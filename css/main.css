@@ -1,0 +1,84 @@
+/**
+ * Main Stylesheet - Trip Planner Website
+ * Imports all CSS modules
+ * 
+ * Architecture:
+ * - base/: Reset, CSS variables, typography
+ * - components/: Reusable UI components
+ * - pages/: Page-specific styles
+ * - utils/: Helper/utility classes
+ */
+
+/* === Base Styles === */
+@import url('base/_variables.css');
+@import url('base/_reset.css');
+@import url('base/_typography.css');
+
+/* === Google Fonts === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+/* === Component Styles === */
+@import url('components/_buttons.css');
+@import url('components/_cards.css');
+@import url('components/_forms.css');
+@import url('components/_modals.css');
+
+/* === Page Styles === */
+@import url('pages/_home.css');
+
+/* === Utility Styles === */
+@import url('utils/_helpers.css');
+
+/* === Global Styles === */
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-gray-300);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-400);
+}
+
+/* Selection */
+::selection {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-dark);
+}
+
+/* Page Wrapper */
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.page-wrapper main {
+    flex: 1;
+}
+
+/* Skip Link (Accessibility) */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: var(--space-2) var(--space-4);
+    z-index: 1000;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
