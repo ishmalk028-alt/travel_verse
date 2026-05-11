@@ -183,11 +183,17 @@ export class TripPlannerVM {
 
   // ─── Cost summary ──────────────────────────────────────────────────────────
   getCostBreakdown() {
+    const hotelsCost = this._trip.hotelsCost;
+    const entertainmentCost = this._trip.entertainmentCost;
+
     return {
-      hotels:         this._trip.hotelsCost,
-      entertainment:  this._trip.entertainmentCost,
-      serviceFee:     this._trip.serviceFee,
-      total:          this._trip.totalCost,
+      hotelsCost,
+      entertainmentCost,
+      serviceFee: this._trip.serviceFee,
+      total: this._trip.totalCost,
+      // Keep legacy aliases so older callers still work.
+      hotels: hotelsCost,
+      entertainment: entertainmentCost,
     };
   }
 

@@ -170,10 +170,21 @@
   const errorEl    = document.getElementById('date-error');
   const errorMsg   = document.getElementById('date-error-msg');
 
-  // Set minimum date to today
-  const today = new Date().toISOString().split('T')[0];
-  startInput.min = today;
-  endInput.min   = today;
+  function toDateInputValue(date) {
+    const local = new Date(date);
+    local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
+    return local.toISOString().split('T')[0];
+  }
+
+  // Trips should start from tomorrow onward.
+  const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrow = toDateInputValue(tomorrowDate);
+
+  startInput.min = tomorrow;
+  endInput.min   = tomorrow;
 
   // Load saved dates
   const saved = tripPlannerVM.getDates();
@@ -224,7 +235,7 @@
       btn.classList.add('filter-chip--active');
 
       const days  = parseInt(btn.dataset.days);
-      const start = startInput.value || today;
+      const start = startInput.value || tomorrow;
       startInput.value = start;
       const end = new Date(start);
       end.setDate(end.getDate() + days);

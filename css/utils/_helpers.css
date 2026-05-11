@@ -134,6 +134,40 @@
 .bg-surface { background: var(--bg-surface); }
 .bg-card    { background: var(--bg-card); }
 
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 30px rgba(99,102,241,0.3);
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+}
+
+.badge--primary { background: rgba(99,102,241,0.15); color: var(--color-primary-light); }
+.badge--success { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+.badge--error   { background: rgba(239,68,68,0.15);  color: #fca5a5; }
+.badge--warning { background: rgba(249,115,22,0.15); color: #fdba74; }
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }

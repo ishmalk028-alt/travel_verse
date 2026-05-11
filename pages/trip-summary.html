@@ -211,7 +211,11 @@
        </div>`;
 
   // Cost breakdown
-  const { hotelsCost, entertainmentCost, serviceFee, total } = tripPlannerVM.getCostBreakdown();
+  const breakdown = tripPlannerVM.getCostBreakdown();
+  const hotelsCost = breakdown.hotelsCost ?? breakdown.hotels ?? 0;
+  const entertainmentCost = breakdown.entertainmentCost ?? breakdown.entertainment ?? 0;
+  const serviceFee = breakdown.serviceFee ?? 0;
+  const total = breakdown.total ?? 0;
   costEl.innerHTML = `
     <div class="expense-row"><span class="expense-row__label">🏨 Hotels</span><span class="expense-row__value">${formatCurrency(hotelsCost)}</span></div>
     <div class="expense-row"><span class="expense-row__label">🎭 Activities</span><span class="expense-row__value">${formatCurrency(entertainmentCost)}</span></div>

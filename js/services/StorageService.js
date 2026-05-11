@@ -12,7 +12,10 @@ export class StorageService {
     TRIP_STATE:        'tripState',
   };
 
+
+
   static get(key) {
+
     try {
       const val = localStorage.getItem(key);
       return val ? JSON.parse(val) : null;
@@ -31,13 +34,17 @@ export class StorageService {
     }
   }
 
-  static remove(key) {
-    localStorage.removeItem(key);
+  static clear() {
+    try {
+      Object.values(StorageService.KEYS).forEach(key => localStorage.removeItem(key));
+      return true;
+    } catch {
+      console.error('StorageService: failed to clear trip data');
+      return false;
+    }
   }
 
-  static clear() {
-    Object.values(StorageService.KEYS).forEach(k => localStorage.removeItem(k));
-  }
+
 
   // Convenience helpers
   static getDates()          { return StorageService.get(StorageService.KEYS.TRIP_DATES); }
