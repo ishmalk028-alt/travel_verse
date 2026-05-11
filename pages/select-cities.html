@@ -21,7 +21,7 @@
         }
         
         .page__header {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
+            background: var(--color-white);
             padding: var(--space-8) 0;
             color: var(--color-white);
         }
@@ -310,8 +310,9 @@
         
         .page__actions .btn { min-width: 150px; }
     </style>
+    <link rel="stylesheet" href="../css/pages/_professional.css">
 </head>
-<body>
+<body class="theme-professional">
     <div class="page">
         <!-- Header -->
         <header class="header is-scrolled">
@@ -393,9 +394,12 @@
         </main>
     </div>
 
+    <script src="../js/services/ApiService.js"></script>
     <script>
-        // Cities data
-        const citiesByCountry = {
+        const api = new ApiService();
+
+        // Fallback cities shown only if the API is unavailable.
+        let citiesByCountry = {
             1: [ // France
                 { id: 1, name: 'Paris', description: 'The City of Light - home to the Eiffel Tower and Louvre.', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=200&fit=crop' },
                 { id: 2, name: 'Nice', description: 'Beautiful coastal city on the French Riviera.', image: 'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?w=400&h=200&fit=crop' }
@@ -445,6 +449,16 @@
         const selectionSummary = document.getElementById('selectionSummary');
         const selectedItems = document.getElementById('selectedItems');
         const continueBtn = document.getElementById('continueBtn');
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
         
         // Render cities
         function renderCities() {
@@ -453,21 +467,21 @@
                 return `
                     <div class="country-section">
                         <div class="country-section__header">
-                            <h2 class="country-section__title">${country.name}</h2>
+                            <h2 class="country-section__title">${escapeHtml(country.name)}</h2>
                             <span class="country-section__badge">${cities.length} cities</span>
                         </div>
                         <div class="cities-grid">
                             ${cities.map(city => `
-                                <div class="city-card ${selectedCities[city.id] ? 'is-selected' : ''}" data-city-id="${city.id}" data-city-name="${city.name}">
-                                    <img src="${city.image}" alt="${city.name}" class="city-card__image">
+                                <div class="city-card ${selectedCities[city.id] ? 'is-selected' : ''}" data-city-id="${city.id}" data-country-id="${country.id}" data-city-name="${escapeHtml(city.name)}">
+                                    <img src="${escapeHtml(city.image || city.image_url || city.imageUrl)}" alt="${escapeHtml(city.name)}" class="city-card__image">
                                     <div class="city-card__body">
                                         <div class="city-card__header">
                                             <div>
-                                                <h3 class="city-card__name">${city.name}</h3>
-                                                <span class="city-card__country">${country.name}</span>
+                                                <h3 class="city-card__name">${escapeHtml(city.name)}</h3>
+                                                <span class="city-card__country">${escapeHtml(country.name)}</span>
                                             </div>
                                         </div>
-                                        <p class="city-card__description">${city.description}</p>
+                                        <p class="city-card__description">${escapeHtml(city.description)}</p>
                                         <div class="city-card__nights">
                                             <div class="city-card__nights-label">Number of nights:</div>
                                             <div class="city-card__nights-control">
@@ -555,7 +569,7 @@
                 selectedItems.innerHTML = cityIds.map(id => {
                     const card = document.querySelector(`[data-city-id="${id}"]`);
                     const name = card ? card.dataset.cityName : 'City';
-                    return `<span class="selection-summary__item">${name} - ${selectedCities[id]} nights</span>`;
+                    return `<span class="selection-summary__item">${escapeHtml(name)} - ${selectedCities[id]} nights</span>`;
                 }).join('');
                 continueBtn.disabled = false;
             } else {
@@ -570,6 +584,7 @@
                 const card = document.querySelector(`[data-city-id="${id}"]`);
                 return {
                     id: parseInt(id),
+                    countryId: card ? parseInt(card.dataset.countryId) : null,
                     name: card ? card.dataset.cityName : 'City',
                     nights: selectedCities[id]
                 };
@@ -585,9 +600,29 @@
             cities.forEach(c => { selectedCities[c.id] = c.nights; });
         }
         
-        // Initialize
-        renderCities();
-        updateUI();
+        async function loadCities() {
+            citiesContainer.innerHTML = '<p style="color: var(--color-gray-500);">Loading cities...</p>';
+
+            try {
+                const loaded = await Promise.all(selectedCountries.map(async country => {
+                    const cities = await api.getCitiesByCountry(country.id);
+                    return [country.id, cities];
+                }));
+
+                loaded.forEach(([countryId, cities]) => {
+                    if (cities.length) {
+                        citiesByCountry[countryId] = cities;
+                    }
+                });
+            } catch (error) {
+                console.warn('Using fallback cities:', error);
+            }
+
+            renderCities();
+            updateUI();
+        }
+
+        loadCities();
     </script>
 </body>
 </html>

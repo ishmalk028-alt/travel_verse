@@ -1,183 +1,80 @@
 <?php
 /**
  * Countries API Endpoint
- * Trip Planner Website
- * 
- * GET /api/countries.php - Get all countries
- * GET /api/countries.php?id=1 - Get single country
+ *
+ * GET /php/api/countries.php
+ * GET /php/api/countries.php?id=1
  */
 
-// Include required files
 require_once __DIR__ . '/../config/constants.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../helpers/response.php';
 require_once __DIR__ . '/../helpers/validation.php';
+require_once __DIR__ . '/../helpers/api.php';
 
-// Handle CORS preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-// Only allow GET requests
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     methodNotAllowedResponse();
 }
 
-// Get parameters
-$id = getInput('id');
-$continent = getInput('continent');
-$popular = getInput('popular');
-$search = getInput('search');
+$db = getDatabaseOrFail();
 
-// Load mock data (replace with database queries later)
-$countriesFile = __DIR__ . '/../../data/countries.json';
+$id = getInput('id', null, 'GET');
+$continent = getInput('continent', null, 'GET');
+$popular = getBooleanInput('popular');
+$search = getInput('search', null, 'GET');
 
-if (!file_exists($countriesFile)) {
-    // Return default data if file doesn't exist
-    $countries = getDefaultCountries();
-} else {
-    $countries = json_decode(file_get_contents($countriesFile), true);
-    if ($countries === null) {
-        $countries = getDefaultCountries();
-    }
-}
-
-// Get single country
 if ($id !== null) {
-    $found = null;
-    foreach ($countries as $country) {
-        if ($country['id'] == $id) {
-            $found = $country;
-            break;
-        }
+    if (!validatePositiveInteger($id)) {
+        validationErrorResponse(['id' => 'Country ID must be a positive integer']);
     }
-    
-    if ($found) {
-        successResponse(['country' => $found]);
-    } else {
+
+    $country = $db->fetchOne(
+        'SELECT id, name, code, continent, image_url, description, currency, language, is_popular
+         FROM countries
+         WHERE id = :id',
+        ['id' => (int) $id]
+    );
+
+    if (!$country) {
         notFoundResponse('Country not found');
     }
+
+    successResponse([
+        'country' => normalizeApiRow($country, ['is_popular'], [], [], ['id'])
+    ]);
 }
 
-// Filter by continent
-if ($continent !== null) {
-    $countries = array_filter($countries, function($country) use ($continent) {
-        return strtolower($country['continent']) === strtolower($continent);
-    });
+$conditions = [];
+$params = [];
+
+if ($continent !== null && $continent !== '') {
+    $conditions[] = 'LOWER(continent) = LOWER(:continent)';
+    $params['continent'] = $continent;
 }
 
-// Filter by popular
 if ($popular !== null) {
-    $isPopular = filter_var($popular, FILTER_VALIDATE_BOOLEAN);
-    $countries = array_filter($countries, function($country) use ($isPopular) {
-        return $country['is_popular'] === $isPopular;
-    });
+    $conditions[] = 'is_popular = :popular';
+    $params['popular'] = $popular ? 1 : 0;
 }
 
-// Search by name
-if ($search !== null) {
-    $searchLower = strtolower($search);
-    $countries = array_filter($countries, function($country) use ($searchLower) {
-        return strpos(strtolower($country['name']), $searchLower) !== false;
-    });
+if ($search !== null && trim($search) !== '') {
+    $conditions[] = 'name LIKE :search';
+    $params['search'] = '%' . trim($search) . '%';
 }
 
-// Return countries
-successResponse(['countries' => array_values($countries)]);
+$where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
+$countries = $db->fetchAll(
+    'SELECT id, name, code, continent, image_url, description, currency, language, is_popular
+     FROM countries' . $where . '
+     ORDER BY name',
+    $params
+);
 
-/**
- * Get default countries data
- * @return array
- */
-function getDefaultCountries() {
-    return [
-        [
-            'id' => 1,
-            'name' => 'France',
-            'code' => 'FR',
-            'continent' => 'Europe',
-            'image_url' => 'assets/images/countries/france.jpg',
-            'description' => 'Known for its art, cuisine, and the iconic Eiffel Tower.',
-            'currency' => 'EUR',
-            'language' => 'French',
-            'is_popular' => true
-        ],
-        [
-            'id' => 2,
-            'name' => 'Japan',
-            'code' => 'JP',
-            'continent' => 'Asia',
-            'image_url' => 'assets/images/countries/japan.jpg',
-            'description' => 'A blend of ancient traditions and cutting-edge technology.',
-            'currency' => 'JPY',
-            'language' => 'Japanese',
-            'is_popular' => true
-        ],
-        [
-            'id' => 3,
-            'name' => 'Italy',
-            'code' => 'IT',
-            'continent' => 'Europe',
-            'image_url' => 'assets/images/countries/italy.jpg',
-            'description' => 'Home to ancient ruins, Renaissance art, and world-class cuisine.',
-            'currency' => 'EUR',
-            'language' => 'Italian',
-            'is_popular' => true
-        ],
-        [
-            'id' => 4,
-            'name' => 'United States',
-            'code' => 'US',
-            'continent' => 'North America',
-            'image_url' => 'assets/images/countries/usa.jpg',
-            'description' => 'From bustling cities to natural wonders, the land of diversity.',
-            'currency' => 'USD',
-            'language' => 'English',
-            'is_popular' => true
-        ],
-        [
-            'id' => 5,
-            'name' => 'Australia',
-            'code' => 'AU',
-            'continent' => 'Oceania',
-            'image_url' => 'assets/images/countries/australia.jpg',
-            'description' => 'Known for unique wildlife, stunning beaches, and the Outback.',
-            'currency' => 'AUD',
-            'language' => 'English',
-            'is_popular' => true
-        ],
-        [
-            'id' => 6,
-            'name' => 'Thailand',
-            'code' => 'TH',
-            'continent' => 'Asia',
-            'image_url' => 'assets/images/countries/thailand.jpg',
-            'description' => 'Famous for tropical beaches, ornate temples, and rich cuisine.',
-            'currency' => 'THB',
-            'language' => 'Thai',
-            'is_popular' => true
-        ],
-        [
-            'id' => 7,
-            'name' => 'Spain',
-            'code' => 'ES',
-            'continent' => 'Europe',
-            'image_url' => 'assets/images/countries/spain.jpg',
-            'description' => 'A country of vibrant culture, beautiful architecture, and fiestas.',
-            'currency' => 'EUR',
-            'language' => 'Spanish',
-            'is_popular' => true
-        ],
-        [
-            'id' => 8,
-            'name' => 'United Kingdom',
-            'code' => 'GB',
-            'continent' => 'Europe',
-            'image_url' => 'assets/images/countries/uk.jpg',
-            'description' => 'Rich history, royal heritage, and iconic landmarks.',
-            'currency' => 'GBP',
-            'language' => 'English',
-            'is_popular' => true
-        ]
-    ];
-}
+successResponse([
+    'countries' => normalizeApiRows($countries, ['is_popular'], [], [], ['id'])
+]);

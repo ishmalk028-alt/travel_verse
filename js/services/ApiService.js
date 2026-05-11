@@ -16,9 +16,23 @@ class ApiService {
      * @returns {string}
      */
     _getBaseUrl() {
-        // In development, use relative path
-        // In production, this would be your API domain
-        return window.location.origin + '/php/api';
+        if (window.location.protocol === 'file:') {
+            const match = window.location.pathname.replace(/\\/g, '/').match(/\/htdocs\/([^/]+)/i);
+            const appFolder = match ? match[1] : 'travel_verse';
+            return `http://localhost/${appFolder}/php/api`;
+        }
+
+        const path = window.location.pathname.replace(/\\/g, '/');
+        const pagesIndex = path.indexOf('/pages/');
+        let appRoot = '';
+
+        if (pagesIndex !== -1) {
+            appRoot = path.slice(0, pagesIndex);
+        } else {
+            appRoot = path.slice(0, path.lastIndexOf('/'));
+        }
+
+        return `${window.location.origin}${appRoot}/php/api`;
     }
 
     /**
@@ -40,22 +54,54 @@ class ApiService {
 
         try {
             const response = await fetch(url, config);
+            const data = await response.json().catch(() => null);
             
             if (!response.ok) {
                 throw new ApiError(
-                    `HTTP error! status: ${response.status}`,
-                    response.status
+                    data?.message || `HTTP error! status: ${response.status}`,
+                    response.status,
+                    data?.errors || null
                 );
             }
 
-            const data = await response.json();
+            if (data && data.success === false) {
+                throw new ApiError(data.message || 'API request failed', response.status, data.errors || null);
+            }
+
             return data;
         } catch (error) {
             if (error instanceof ApiError) {
                 throw error;
             }
-            throw new ApiError(error.message, 0);
+            throw new ApiError(
+                `${error.message}. Make sure Apache is running and open the site through http://localhost/travel_verse/.`,
+                0
+            );
         }
+    }
+
+    /**
+     * Extract data from the standard PHP response envelope.
+     * @param {Object} response
+     * @returns {*}
+     */
+    _payload(response) {
+        return response && Object.prototype.hasOwnProperty.call(response, 'data')
+            ? response.data
+            : response;
+    }
+
+    /**
+     * Extract a named collection/object from the API payload.
+     * @param {Object} response
+     * @param {string} key
+     * @param {*} fallback
+     * @returns {*}
+     */
+    _extract(response, key, fallback = []) {
+        const payload = this._payload(response);
+        if (!payload) return fallback;
+        return Object.prototype.hasOwnProperty.call(payload, key) ? payload[key] : fallback;
     }
 
     /**
@@ -113,7 +159,8 @@ class ApiService {
      */
     async getCountries() {
         const data = await this.get('/countries.php');
-        return Country.fromJSONArray(data.countries || data);
+        const countries = this._extract(data, 'countries');
+        return typeof Country !== 'undefined' ? Country.fromJSONArray(countries) : countries;
     }
 
     /**
@@ -123,7 +170,8 @@ class ApiService {
      */
     async getCountryById(id) {
         const data = await this.get(`/countries.php`, { id });
-        return Country.fromJSON(data.country || data);
+        const country = this._extract(data, 'country', {});
+        return typeof Country !== 'undefined' ? Country.fromJSON(country) : country;
     }
 
     /**
@@ -133,7 +181,8 @@ class ApiService {
      */
     async getCitiesByCountry(countryId) {
         const data = await this.get('/cities.php', { country_id: countryId });
-        return City.fromJSONArray(data.cities || data);
+        const cities = this._extract(data, 'cities');
+        return typeof City !== 'undefined' ? City.fromJSONArray(cities) : cities;
     }
 
     /**
@@ -143,7 +192,8 @@ class ApiService {
      */
     async getCityById(id) {
         const data = await this.get('/cities.php', { id });
-        return City.fromJSON(data.city || data);
+        const city = this._extract(data, 'city', {});
+        return typeof City !== 'undefined' ? City.fromJSON(city) : city;
     }
 
     /**
@@ -155,7 +205,8 @@ class ApiService {
     async getHotelsByCity(cityId, filters = {}) {
         const params = { city_id: cityId, ...filters };
         const data = await this.get('/hotels.php', params);
-        return Hotel.fromJSONArray(data.hotels || data);
+        const hotels = this._extract(data, 'hotels');
+        return typeof Hotel !== 'undefined' ? Hotel.fromJSONArray(hotels) : hotels;
     }
 
     /**
@@ -165,7 +216,8 @@ class ApiService {
      */
     async getHotelById(id) {
         const data = await this.get('/hotels.php', { id });
-        return Hotel.fromJSON(data.hotel || data);
+        const hotel = this._extract(data, 'hotel', {});
+        return typeof Hotel !== 'undefined' ? Hotel.fromJSON(hotel) : hotel;
     }
 
     /**
@@ -177,7 +229,10 @@ class ApiService {
     async getEntertainmentByCity(cityId, filters = {}) {
         const params = { city_id: cityId, ...filters };
         const data = await this.get('/entertainment.php', params);
-        return Entertainment.fromJSONArray(data.entertainment || data);
+        const entertainment = this._extract(data, 'entertainment');
+        return typeof Entertainment !== 'undefined'
+            ? Entertainment.fromJSONArray(entertainment)
+            : entertainment;
     }
 
     /**
@@ -186,7 +241,8 @@ class ApiService {
      * @returns {Promise<Object>}
      */
     async saveTrip(trip) {
-        return this.post('/trips.php', trip.toJSON());
+        const payload = trip && typeof trip.toJSON === 'function' ? trip.toJSON() : trip;
+        return this.post('/trips.php', payload);
     }
 
     /**
@@ -196,7 +252,8 @@ class ApiService {
      */
     async getTripById(tripId) {
         const data = await this.get('/trips.php', { id: tripId });
-        return Trip.fromJSON(data.trip || data);
+        const trip = this._extract(data, 'trip', {});
+        return typeof Trip !== 'undefined' ? Trip.fromJSON(trip) : trip;
     }
 }
 
@@ -204,10 +261,11 @@ class ApiService {
  * Custom API Error class
  */
 class ApiError extends Error {
-    constructor(message, statusCode) {
+    constructor(message, statusCode, errors = null) {
         super(message);
         this.name = 'ApiError';
         this.statusCode = statusCode;
+        this.errors = errors;
     }
 }
 

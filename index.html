@@ -19,11 +19,11 @@
         /* Hero Section */
         .hero {
             position: relative;
-            min-height: 100vh;
+            min-height: auto;
             display: flex;
             
             align-items: center;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
+            background: var(--color-gray-50);
             overflow: hidden;
         }
         
@@ -52,7 +52,7 @@
             border-radius: var(--radius-full);
             font-size: var(--text-sm);
             font-weight: var(--font-medium);
-            margin-bottom: var(--space-6);
+            margin-bottom: var(--space-3);
         }
         
         .hero__title {
@@ -60,7 +60,7 @@
             font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: var(--font-bold);
             line-height: 1.1;
-            margin-bottom: var(--space-6);
+            margin-bottom: var(--space-4);
         }
         
         .hero__title span {
@@ -70,8 +70,8 @@
         .hero__subtitle {
             font-size: var(--text-lg);
             opacity: 0.9;
-            margin-bottom: var(--space-8);
-            line-height: 1.7;
+            margin-bottom: var(--space-4);
+            line-height: 1.6;
         }
      .hero__actions {
             display: flex;
@@ -130,9 +130,9 @@
         /* Stats Section */
         .hero__stats {
             display: flex;
-            gap: var(--space-8);
-            margin-top: var(--space-12);
-            padding-top: var(--space-8);
+            gap: var(--space-6);
+            margin-top: var(--space-5);
+            padding-top: var(--space-4);
             border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
         
@@ -212,7 +212,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--color-primary-100) 0%, var(--color-primary-50) 100%);
+            background: var(--color-primary-50);
             border-radius: var(--radius-xl);
             margin-bottom: var(--space-5);
         }
@@ -265,7 +265,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
+            background: var(--color-primary);
             color: var(--color-white);
             font-family: var(--font-secondary);
             font-size: var(--text-2xl);
@@ -334,7 +334,7 @@
             left: 0;
             right: 0;
             padding: var(--space-6);
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            background: rgba(15, 23, 42, 0.76);
             color: var(--color-white);
         }
         
@@ -353,7 +353,7 @@
         /* CTA Section */
         .cta {
             padding: var(--space-20) 0;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
+            background: var(--color-primary);
             text-align: center;
             color: var(--color-white);
         }
@@ -390,9 +390,162 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
+        /* Footer Styles */
+    .footer {
+        background-color: var(--color-gray-900);
+        color: var(--color-gray-300);
+        padding-top: var(--space-16);
+    }
+
+    .footer__top {
+        padding-bottom: var(--space-12);
+    }
+
+    .footer__grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: var(--space-8);
+    }
+
+    @media (max-width: 1024px) {
+        .footer__grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .footer__col--brand {
+            grid-column: span 2;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .footer__grid {
+            grid-template-columns: 1fr;
+        }
+
+        .footer__col--brand {
+            grid-column: span 1;
+        }
+    }
+
+    /* Logo */
+    .footer__logo {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-bottom: var(--space-4);
+        text-decoration: none;
+    }
+
+    .footer__logo-icon {
+        width: 32px;
+        height: 32px;
+        color: var(--color-primary);
+    }
+
+    .footer__logo span {
+        font-family: var(--font-secondary);
+        font-size: var(--text-xl);
+        font-weight: var(--font-bold);
+        color: var(--color-white);
+    }
+
+    .footer__description {
+        color: var(--color-gray-400);
+        margin-bottom: var(--space-6);
+        max-width: 300px;
+    }
+
+    /* Social Links */
+    .footer__social {
+        display: flex;
+        flex-direction: row;
+        gap: 16px; /* FIXED: Added standard pixel unit for gap */
+    }
+
+    .footer__social-link {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--color-gray-800);
+        border-radius: var(--radius-lg);
+        color: var(--color-gray-400);
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+
+    .footer__social-link:hover {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+    }
+
+    .footer__social-link svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Column Title */
+    .footer__title {
+        font-family: var(--font-secondary);
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+        color: var(--color-white);
+        margin-bottom: var(--space-4);
+    }
+
+    /* Links */
+    .footer__links {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer__links a {
+        color: var(--color-gray-400);
+        transition: color var(--transition-fast);
+        text-decoration: none;
+    }
+
+    .footer__links a:hover {
+        color: var(--color-white);
+    }
+
+    /* Footer Bottom */
+    .footer__bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-6) 0;
+        border-top: 1px solid var(--color-gray-800);
+    }
+
+    @media (max-width: 640px) {
+        .footer__bottom {
+            flex-direction: column;
+            gap: var(--space-2);
+            text-align: center;
+        }
+    }
+
+    .footer__copyright {
+        color: var(--color-gray-500);
+        font-size: var(--text-sm);
+        margin: 0;
+    }
+
+    .footer__credit {
+        color: var(--color-gray-500);
+        font-size: var(--text-sm);
+        margin: 0;
+    }
     </style>
+    <link rel="stylesheet" href="css/pages/_professional.css">
 </head>
-<body>
+<body class="theme-professional">
         <!-- Header -->
         <header class="header" id="header" style="background:rgba(255,255,255,0.95);box-shadow:0 2px 16px rgba(37,99,235,0.06);backdrop-filter:blur(8px);">
             <div class="container">
@@ -413,7 +566,7 @@
                         </ul>
                     </nav>
                     <div class="header__actions" style="display:flex;align-items:center;gap:1.5rem;">
-                        <a href="pages/select-dates.html" class="btn btn--primary" style="padding:0.75rem 2rem;font-size:1rem;font-weight:600;border-radius:2rem;background:linear-gradient(90deg,var(--color-primary),var(--color-accent));color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.10);transition:box-shadow .2s,transform .2s;">Start Planning</a>
+                        <a href="pages/select-dates.html" class="btn btn--primary" style="padding:0.75rem 2rem;font-size:1rem;font-weight:600;border-radius:0.5rem;background:var(--color-primary);color:#fff;box-shadow:0 2px 8px rgba(15,23,42,0.08);transition:box-shadow .2s,transform .2s;">Start Planning</a>
                         <button class="header__menu-toggle" id="menuToggle" aria-label="Toggle menu" style="background:none;border:none;outline:none;display:none;flex-direction:column;gap:5px;cursor:pointer;">
                             <span class="header__menu-icon" style="display:block;width:28px;height:3px;background:var(--color-primary);border-radius:2px;"></span>
                             <span class="header__menu-icon" style="display:block;width:28px;height:3px;background:var(--color-primary);border-radius:2px;"></span>
@@ -428,7 +581,7 @@
                         <li><a href="#features" class="header__mobile-nav-link" style="font-size:1.3rem;font-weight:600;color:var(--color-primary)">Features</a></li>
                         <li><a href="#how-it-works" class="header__mobile-nav-link" style="font-size:1.3rem;font-weight:600;color:var(--color-primary)">How It Works</a></li>
                         <li><a href="#destinations" class="header__mobile-nav-link" style="font-size:1.3rem;font-weight:600;color:var(--color-primary)">Destinations</a></li>
-                        <li><a href="pages/select-dates.html" class="btn btn--primary btn--block" style="padding:1rem 2.5rem;font-size:1.1rem;border-radius:2rem;background:linear-gradient(90deg,var(--color-primary),var(--color-accent));color:#fff;">Start Planning</a></li>
+                        <li><a href="pages/select-dates.html" class="btn btn--primary btn--block" style="padding:1rem 2.5rem;font-size:1.1rem;border-radius:0.5rem;background:var(--color-primary);color:#fff;">Start Planning</a></li>
                     </ul>
                 </nav>
             </div>
@@ -438,12 +591,12 @@
     <section class="hero">
         <div class="container">
             <div class="hero__content">
-                <span class="hero__badge">✈️ Plan Your Adventure</span>
+                <span class="hero__badge">Plan Your Adventure</span>
                 <h1 class="hero__title">
                     Discover the World, <span>One Trip at a Time</span>
                 </h1>
                 <p class="hero__subtitle">
-                    Plan your perfect trip with ease. Select destinations, book hotels, discover entertainment spots, and track your expenses — all in one place.
+                    Plan your perfect trip with ease. Select destinations, book hotels, discover entertainment spots, and track your expenses in one place.
                 </p>
                 <div class="hero__actions">
                     <a href="pages/select-dates.html" class="hero__btn-primary">
@@ -696,53 +849,94 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer__top">
-                <div class="footer__grid">
-                    <div class="footer__col footer__col--brand">
-                        <a href="index.html" class="footer__logo">
-                            <svg class="footer__logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+    <div class="container">
+        <!-- Footer Top -->
+        <div class="footer__top">
+            <div class="footer__grid">
+                <!-- Brand Column -->
+                <div class="footer__col footer__col--brand">
+                    <a href="index.html" class="footer__logo">
+                        <svg class="footer__logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        <span>TripPlanner</span>
+                    </a>
+                    <p class="footer__description">
+                        Plan your perfect trip with ease. Select destinations, book hotels, and discover amazing entertainment spots.
+                    </p>
+                    <!-- Social Links -->
+                    <div class="footer__social">
+                        <a href="#" class="footer__social-link" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                             </svg>
-                            <span>TripPlanner</span>
                         </a>
-                        <p class="footer__description">
-                            Plan your perfect trip with ease. Select destinations, book hotels, and discover amazing entertainment spots.
-                        </p>
-                    </div>
-                    
-                    <div class="footer__col">
-                        <h4 class="footer__title">Quick Links</h4>
-                        <ul class="footer__links">
-                            <li><a href="index.html">Home</a></li>
-                            <li><a href="pages/select-countries.html">Destinations</a></li>
-                            <li><a href="pages/select-dates.html">Plan Trip</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer__col">
-                        <h4 class="footer__title">Support</h4>
-                        <ul class="footer__links">
-                            <li><a href="#">FAQ</a></li>
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Contact</a></li>
-                        </ul>
+                        <a href="#" class="footer__social-link" aria-label="Twitter">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="footer__social-link" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                        </a>
                     </div>
                 </div>
-            </div>
-            
-            <div class="footer__bottom">
-                <p class="footer__copyright">
-                    &copy; 2026 TripPlanner. All rights reserved.
-                </p>
-                <p class="footer__credit">
-                    Made with ❤️ for Web Lab Project
-                </p>
+
+                <!-- Quick Links -->
+                <div class="footer__col">
+                    <h4 class="footer__title">Quick Links</h4>
+                    <ul class="footer__links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="pages/select-countries.html">Destinations</a></li>
+                        <li><a href="pages/select-dates.html">Plan Trip</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Destinations -->
+                <div class="footer__col">
+                    <h4 class="footer__title">Top Destinations</h4>
+                    <ul class="footer__links">
+                        <li><a href="#">Paris, France</a></li>
+                        <li><a href="#">Tokyo, Japan</a></li>
+                        <li><a href="#">Rome, Italy</a></li>
+                        <li><a href="#">New York, USA</a></li>
+                        <li><a href="#">Bangkok, Thailand</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer__col">
+                    <h4 class="footer__title">Support</h4>
+                    <ul class="footer__links">
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </footer>
+
+        <!-- Footer Bottom -->
+        <div class="footer__bottom">
+            <p class="footer__copyright">
+                &copy; 2026 TripPlanner. All rights reserved.
+            </p>
+            <p class="footer__credit">
+                Made with ❤️ for Web Lab Project
+            </p>
+        </div>
+    </div>
+</footer>
 
     <!-- Scripts -->
     <script>

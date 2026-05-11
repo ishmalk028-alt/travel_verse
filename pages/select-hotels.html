@@ -15,7 +15,7 @@
     
     <style>
         .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .page__header { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%); padding: var(--space-8) 0; color: var(--color-white); }
+        .page__header { background: var(--color-white); padding: var(--space-8) 0; color: var(--color-text-high); }
         .page__title { font-family: var(--font-secondary); font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-2); }
         .page__subtitle { opacity: 0.9; }
         .page__content { flex: 1; padding: var(--space-12) 0; background-color: var(--color-gray-50); }
@@ -78,8 +78,9 @@
         .page__actions { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-6); background-color: var(--color-white); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); margin-top: var(--space-8); }
         .page__actions .btn { min-width: 150px; }
     </style>
+    <link rel="stylesheet" href="../css/pages/_professional.css">
 </head>
-<body>
+<body class="theme-professional">
     <div class="page">
         <header class="header is-scrolled">
             <div class="container">
@@ -147,8 +148,12 @@
         </main>
     </div>
 
+    <script src="../js/services/ApiService.js"></script>
     <script>
-        const hotelsByCityId = {
+        const api = new ApiService();
+
+        // Fallback hotels shown only if the API is unavailable.
+        let hotelsByCityId = {
             1: [ // Paris
                 { id: 1, name: 'Hotel Le Marais', stars: 4, price: 189, amenities: ['WiFi', 'Breakfast', 'Gym'], reviews: 245, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=200&fit=crop' },
                 { id: 2, name: 'Grand Palace Hotel', stars: 5, price: 350, amenities: ['WiFi', 'Pool', 'Spa', 'Restaurant'], reviews: 512, image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=200&fit=crop' },
@@ -192,13 +197,35 @@
             return '★'.repeat(count) + '☆'.repeat(5 - count);
         }
         
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        function normalizeHotel(hotel) {
+            return {
+                id: hotel.id,
+                name: hotel.name,
+                stars: Number(hotel.stars ?? hotel.star_rating ?? hotel.starRating ?? 3),
+                price: Number(hotel.price ?? hotel.price_per_night ?? hotel.pricePerNight ?? 0),
+                amenities: hotel.amenities || [],
+                reviews: Number(hotel.reviews ?? hotel.review_count ?? hotel.reviewCount ?? 0),
+                image: hotel.image || hotel.image_url || hotel.imageUrl || ''
+            };
+        }
+
         function renderHotels() {
             hotelsContainer.innerHTML = selectedCities.map(city => {
-                let hotels = hotelsByCityId[city.id] || defaultHotels.map((h, i) => ({ ...h, id: city.id * 1000 + i }));
+                let hotels = (hotelsByCityId[city.id] || defaultHotels.map((h, i) => ({ ...h, id: city.id * 1000 + i }))).map(normalizeHotel);
                 return `
                     <div class="city-section">
                         <div class="city-section__header">
-                            <h2 class="city-section__title">${city.name}</h2>
+                            <h2 class="city-section__title">${escapeHtml(city.name)}</h2>
                             <div class="city-section__info">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 ${city.nights} night${city.nights > 1 ? 's' : ''}
@@ -208,11 +235,11 @@
                             ${hotels.map(hotel => `
                                 <div class="hotel-card ${selectedHotels[city.id] === hotel.id ? 'is-selected' : ''}" 
                                      data-city-id="${city.id}" data-hotel-id="${hotel.id}" data-price="${hotel.price}" data-nights="${city.nights}">
-                                    <img src="${hotel.image}" alt="${hotel.name}" class="hotel-card__image">
+                                    <img src="${escapeHtml(hotel.image)}" alt="${escapeHtml(hotel.name)}" class="hotel-card__image">
                                     <div class="hotel-card__body">
                                         <div class="hotel-card__header">
                                             <div>
-                                                <h3 class="hotel-card__name">${hotel.name}</h3>
+                                                <h3 class="hotel-card__name">${escapeHtml(hotel.name)}</h3>
                                                 <div class="hotel-card__rating">
                                                     <span class="hotel-card__stars">${getStars(hotel.stars)}</span>
                                                     <span class="hotel-card__review">(${hotel.reviews} reviews)</span>
@@ -224,7 +251,7 @@
                                             </div>
                                         </div>
                                         <div class="hotel-card__amenities">
-                                            ${hotel.amenities.map(a => `<span class="hotel-card__amenity">${a}</span>`).join('')}
+                                            ${hotel.amenities.map(a => `<span class="hotel-card__amenity">${escapeHtml(a)}</span>`).join('')}
                                         </div>
                                         <div class="hotel-card__footer">
                                             <span class="hotel-card__total">Total: <span>$${hotel.price * city.nights}</span></span>
@@ -300,8 +327,29 @@
             hotels.forEach(h => { selectedHotels[h.cityId] = h.hotelId; });
         }
         
-        renderHotels();
-        updateUI();
+        async function loadHotels() {
+            hotelsContainer.innerHTML = '<p style="color: var(--color-gray-500);">Loading hotels...</p>';
+
+            try {
+                const loaded = await Promise.all(selectedCities.map(async city => {
+                    const hotels = await api.getHotelsByCity(city.id);
+                    return [city.id, hotels];
+                }));
+
+                loaded.forEach(([cityId, hotels]) => {
+                    if (hotels.length) {
+                        hotelsByCityId[cityId] = hotels;
+                    }
+                });
+            } catch (error) {
+                console.warn('Using fallback hotels:', error);
+            }
+
+            renderHotels();
+            updateUI();
+        }
+
+        loadHotels();
     </script>
 </body>
 </html>

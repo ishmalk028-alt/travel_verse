@@ -154,7 +154,7 @@
     left: 0;
     right: 0;
     padding: var(--space-5);
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    background: rgba(15, 23, 42, 0.76);
     color: var(--color-white);
 }
 

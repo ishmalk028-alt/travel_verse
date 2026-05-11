@@ -21,7 +21,7 @@
         }
         
         .page__header {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
+            background: var(--color-white);
             padding: var(--space-8) 0;
             color: var(--color-white);
         }
@@ -170,7 +170,7 @@
             left: 0;
             right: 0;
             padding: var(--space-6);
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+            background: rgba(15, 23, 42, 0.76);
             color: var(--color-white);
         }
         
@@ -256,8 +256,9 @@
             min-width: 150px;
         }
     </style>
+    <link rel="stylesheet" href="../css/pages/_professional.css">
 </head>
-<body>
+<body class="theme-professional">
     <div class="page">
         <!-- Header -->
         <header class="header is-scrolled">
@@ -383,9 +384,12 @@
         </main>
     </div>
 
+    <script src="../js/services/ApiService.js"></script>
     <script>
-        // Sample countries data
-        const countries = [
+        const api = new ApiService();
+
+        // Fallback countries shown only if the API is unavailable.
+        let countries = [
             { id: 1, name: '🇫🇷 France', region: 'Europe', description: 'Known for art, cuisine, and the iconic Eiffel Tower.', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=300&fit=crop' },
             { id: 2, name: '🇯🇵 Japan', region: 'Asia', description: 'Where ancient traditions meet cutting-edge technology.', image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop' },
             { id: 3, name: '🇮🇹 Italy', region: 'Europe', description: 'Home to Rome, Venice, and Renaissance masterpieces.', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=300&fit=crop' },
@@ -402,17 +406,43 @@
         const selectedCount = document.getElementById('selectedCount');
         const clearSelectionBtn = document.getElementById('clearSelection');
         const continueBtn = document.getElementById('continueBtn');
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        function getFlagEmoji(code) {
+            if (!code) return '';
+            return code
+                .toUpperCase()
+                .replace(/[^A-Z]/g, '')
+                .split('')
+                .map(char => String.fromCodePoint(127397 + char.charCodeAt()))
+                .join('');
+        }
+
+        function getCountryName(country) {
+            const fallbackName = country.name || '';
+            const flag = getFlagEmoji(country.code);
+            return `${flag} ${fallbackName}`.trim();
+        }
         
         // Render countries
         function renderCountries() {
             countriesGrid.innerHTML = countries.map(country => `
                 <div class="country-card ${selectedCountries.includes(country.id) ? 'is-selected' : ''}" 
                      data-country-id="${country.id}">
-                    <img src="${country.image}" alt="${country.name}" class="country-card__image">
+                    <img src="${escapeHtml(country.image || country.image_url || country.imageUrl)}" alt="${escapeHtml(country.name)}" class="country-card__image">
                     <div class="country-card__overlay">
-                        <span class="country-card__region">${country.region}</span>
-                        <h3 class="country-card__name">${country.name}</h3>
-                        <p class="country-card__description">${country.description}</p>
+                        <span class="country-card__region">${escapeHtml(country.region || country.continent)}</span>
+                        <h3 class="country-card__name">${escapeHtml(getCountryName(country))}</h3>
+                        <p class="country-card__description">${escapeHtml(country.description)}</p>
                     </div>
                     <div class="country-card__checkbox">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -473,9 +503,24 @@
             selectedCountries = saved.map(c => c.id);
         }
         
-        // Initialize
-        renderCountries();
-        updateUI();
+        async function loadCountries() {
+            countriesGrid.innerHTML = '<p style="color: var(--color-gray-500);">Loading destinations...</p>';
+
+            try {
+                const loadedCountries = await api.getCountries();
+                if (loadedCountries.length) {
+                    countries = loadedCountries;
+                }
+                selectedCountries = selectedCountries.filter(id => countries.some(country => country.id === id));
+            } catch (error) {
+                console.warn('Using fallback countries:', error);
+            }
+
+            renderCountries();
+            updateUI();
+        }
+
+        loadCountries();
     </script>
 </body>
 </html>

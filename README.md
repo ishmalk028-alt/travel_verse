@@ -181,9 +181,17 @@ website/
 
 3. **For full functionality with PHP**
    - Place project in your web server's document root
-   - For XAMPP: `C:\xampp\htdocs\website`
+   - For XAMPP: `C:\xampp\htdocs\travel_verse`
    - For WAMP: `C:\wamp64\www\website`
-   - Access via `http://localhost/website`
+   - Access via `http://localhost/travel_verse`
+
+4. **Set up MySQL for XAMPP**
+   - Start Apache and MySQL from the XAMPP Control Panel
+   - Import `database/trip_planner.sql` in phpMyAdmin, or run:
+     ```powershell
+     C:\xampp\mysql\bin\mysql.exe -u root --execute="source C:/xampp/htdocs/travel_verse/database/trip_planner.sql"
+     ```
+   - The PHP API uses database name `trip_planner`, user `root`, and an empty password by default. Change those values in `php/config/database.php` if your MySQL setup is different.
 
 ### Running the Project
 

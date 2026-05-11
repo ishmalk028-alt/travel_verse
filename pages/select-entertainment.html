@@ -12,7 +12,7 @@
     
     <style>
         .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .page__header { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%); padding: var(--space-8) 0; color: var(--color-white); }
+        .page__header { background: var(--color-white); padding: var(--space-8) 0; color: var(--color-text-high); }
         .page__title { font-family: var(--font-secondary); font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-2); }
         .page__subtitle { opacity: 0.9; }
         .page__content { flex: 1; padding: var(--space-12) 0; background-color: var(--color-gray-50); }
@@ -76,8 +76,9 @@
         
         .skip-note { text-align: center; padding: var(--space-4); background-color: var(--color-gray-100); border-radius: var(--radius-lg); margin-bottom: var(--space-8); color: var(--color-gray-600); }
     </style>
+    <link rel="stylesheet" href="../css/pages/_professional.css">
 </head>
-<body>
+<body class="theme-professional">
     <div class="page">
         <header class="header is-scrolled">
             <div class="container">
@@ -151,8 +152,12 @@
         </main>
     </div>
 
+    <script src="../js/services/ApiService.js"></script>
     <script>
-        const entertainmentByCityId = {
+        const api = new ApiService();
+
+        // Fallback activities shown only if the API is unavailable.
+        let entertainmentByCityId = {
             1: [ // Paris
                 { id: 1, name: 'Eiffel Tower Tour', type: 'Landmark', duration: '2 hours', price: 35, description: 'Skip-the-line access to the iconic Paris landmark.', image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce65f4?w=400&h=200&fit=crop' },
                 { id: 2, name: 'Louvre Museum', type: 'Museum', duration: '3 hours', price: 25, description: 'Explore world-famous art including the Mona Lisa.', image: 'https://images.unsplash.com/photo-1499426600726-ac2c83e6f560?w=400&h=200&fit=crop' },
@@ -194,27 +199,49 @@
         
         const entertainmentContainer = document.getElementById('entertainmentContainer');
         const continueBtn = document.getElementById('continueBtn');
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        function normalizeEntertainment(item) {
+            return {
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                duration: item.duration || item.durationMinutes || 'Varies',
+                price: Number(item.price || 0),
+                description: item.description,
+                image: item.image || item.image_url || item.imageUrl || ''
+            };
+        }
         
         function renderEntertainment() {
             entertainmentContainer.innerHTML = selectedCities.map(city => {
-                let entertainment = entertainmentByCityId[city.id] || defaultEntertainment.map((e, i) => ({ ...e, id: city.id * 1000 + i }));
+                let entertainment = (entertainmentByCityId[city.id] || defaultEntertainment.map((e, i) => ({ ...e, id: city.id * 1000 + i }))).map(normalizeEntertainment);
                 return `
                     <div class="city-section">
                         <div class="city-section__header">
-                            <h2 class="city-section__title">${city.name}</h2>
+                            <h2 class="city-section__title">${escapeHtml(city.name)}</h2>
                         </div>
                         <div class="entertainment-grid">
                             ${entertainment.map(item => `
                                 <div class="entertainment-card ${selectedEntertainment.includes(item.id) ? 'is-selected' : ''}" 
-                                     data-id="${item.id}" data-price="${item.price}" data-name="${item.name}">
-                                    <img src="${item.image}" alt="${item.name}" class="entertainment-card__image">
+                                     data-id="${item.id}" data-city-id="${city.id}" data-price="${item.price}" data-name="${escapeHtml(item.name)}">
+                                    <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="entertainment-card__image">
                                     <div class="entertainment-card__body">
-                                        <span class="entertainment-card__type">${item.type}</span>
-                                        <h3 class="entertainment-card__name">${item.name}</h3>
+                                        <span class="entertainment-card__type">${escapeHtml(item.type)}</span>
+                                        <h3 class="entertainment-card__name">${escapeHtml(item.name)}</h3>
                                         <div class="entertainment-card__meta">
-                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${item.duration}</span>
+                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${escapeHtml(item.duration)}</span>
                                         </div>
-                                        <p class="entertainment-card__description">${item.description}</p>
+                                        <p class="entertainment-card__description">${escapeHtml(item.description)}</p>
                                         <div class="entertainment-card__footer">
                                             ${item.price > 0 ? `<span class="entertainment-card__price">$${item.price}</span>` : '<span class="entertainment-card__free">Free</span>'}
                                             <button class="btn btn--primary btn--sm">${selectedEntertainment.includes(item.id) ? 'Remove' : 'Add'}</button>
@@ -274,6 +301,7 @@
                 const card = document.querySelector(`.entertainment-card[data-id="${id}"]`);
                 return {
                     id: id,
+                    cityId: parseInt(card.dataset.cityId),
                     name: card.dataset.name,
                     price: parseInt(card.dataset.price) || 0
                 };
@@ -289,8 +317,29 @@
             selectedEntertainment = entertainment.map(e => e.id);
         }
         
-        renderEntertainment();
-        updateUI();
+        async function loadEntertainment() {
+            entertainmentContainer.innerHTML = '<p style="color: var(--color-gray-500);">Loading activities...</p>';
+
+            try {
+                const loaded = await Promise.all(selectedCities.map(async city => {
+                    const entertainment = await api.getEntertainmentByCity(city.id);
+                    return [city.id, entertainment];
+                }));
+
+                loaded.forEach(([cityId, entertainment]) => {
+                    if (entertainment.length) {
+                        entertainmentByCityId[cityId] = entertainment;
+                    }
+                });
+            } catch (error) {
+                console.warn('Using fallback activities:', error);
+            }
+
+            renderEntertainment();
+            updateUI();
+        }
+
+        loadEntertainment();
     </script>
 </body>
 </html>

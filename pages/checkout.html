@@ -12,7 +12,7 @@
     
     <style>
         .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .page__header { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%); padding: var(--space-8) 0; color: var(--color-white); }
+        .page__header { background: var(--color-white); padding: var(--space-8) 0; color: var(--color-text-high); }
         .page__title { font-family: var(--font-secondary); font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-2); }
         .page__subtitle { opacity: 0.9; }
         .page__content { flex: 1; padding: var(--space-12) 0; background-color: var(--color-gray-50); }
@@ -77,8 +77,9 @@
         .success-modal__booking-label { font-size: var(--text-sm); color: var(--color-gray-500); }
         .success-modal__booking-id { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-primary); }
     </style>
+    <link rel="stylesheet" href="../css/pages/_professional.css">
 </head>
-<body>
+<body class="theme-professional">
     <div class="page">
         <header class="header is-scrolled">
             <div class="container">
@@ -218,11 +219,60 @@
         </div>
     </div>
 
+    <script src="../js/services/ApiService.js"></script>
     <script>
-        // Load totals
-        const totals = JSON.parse(localStorage.getItem('tripTotal') || '{}');
-        const hotels = JSON.parse(localStorage.getItem('tripHotels') || '[]');
-        const entertainment = JSON.parse(localStorage.getItem('tripEntertainment') || '[]');
+        const api = new ApiService();
+        document.getElementById('successModal').classList.remove('is-visible');
+
+        function getStoredJson(key, fallback) {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+                return parsed === null ? fallback : parsed;
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function getTripPayload() {
+            return {
+                dates: getStoredJson('tripDates', {}),
+                countries: getStoredJson('tripCountries', []),
+                cities: getStoredJson('tripCities', []),
+                totals: getStoredJson('tripTotal', {}),
+                hotels: getStoredJson('tripHotels', []),
+                entertainment: getStoredJson('tripEntertainment', [])
+            };
+        }
+
+        function getApiErrorMessage(error) {
+            if (!error?.errors) {
+                return error?.message || 'Could not save your booking. Please try again.';
+            }
+
+            return Object.values(error.errors).join('\n');
+        }
+
+        function hasTripSelections(payload) {
+            return Array.isArray(payload.countries)
+                && Array.isArray(payload.cities)
+                && Array.isArray(payload.hotels)
+                && payload.countries.length > 0
+                && payload.cities.length > 0
+                && payload.hotels.length > 0;
+        }
+
+        async function saveBooking(payload) {
+            const response = await api.saveTrip(payload);
+            const booking = response?.data?.booking;
+
+            if (!response?.success || !booking?.bookingCode) {
+                throw new Error('The booking was not confirmed by the backend.');
+            }
+
+            return booking;
+        }
+
+        const { totals, hotels, entertainment } = getTripPayload();
         
         // Render order items
         let orderItemsHtml = '';
@@ -287,31 +337,49 @@
         });
         
         // Place order
-        document.getElementById('placeOrderBtn').addEventListener('click', () => {
-            const form = document.getElementById('checkoutForm');
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            
-            if (!firstName || !lastName || !email) {
+        document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+            const placeOrderBtn = document.getElementById('placeOrderBtn');
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const paymentMethod = document.querySelector('.payment-method.is-selected')?.dataset.method || 'card';
+            const payload = getTripPayload();
+
+            if (!firstName || !lastName || !email || !phone) {
                 alert('Please fill in all contact information fields.');
                 return;
             }
-            
-            // Generate booking ID
-            const bookingId = 'TP-' + Date.now().toString().slice(-6);
-            document.getElementById('bookingId').textContent = bookingId;
-            
-            // Show success modal
-            document.getElementById('successModal').classList.add('is-visible');
-            
-            // Clear trip data
-            localStorage.removeItem('tripDates');
-            localStorage.removeItem('tripCountries');
-            localStorage.removeItem('tripCities');
-            localStorage.removeItem('tripHotels');
-            localStorage.removeItem('tripEntertainment');
-            localStorage.removeItem('tripTotal');
+
+            if (!hasTripSelections(payload)) {
+                alert('Your trip selections are missing. Please go back to the summary page and continue to checkout again.');
+                return;
+            }
+
+            placeOrderBtn.disabled = true;
+            placeOrderBtn.textContent = 'Saving Booking...';
+
+            try {
+                const booking = await saveBooking({
+                    contact: { firstName, lastName, email, phone },
+                    paymentMethod,
+                    ...payload
+                });
+
+                document.getElementById('bookingId').textContent = booking.bookingCode;
+                document.getElementById('successModal').classList.add('is-visible');
+
+                localStorage.removeItem('tripDates');
+                localStorage.removeItem('tripCountries');
+                localStorage.removeItem('tripCities');
+                localStorage.removeItem('tripHotels');
+                localStorage.removeItem('tripEntertainment');
+                localStorage.removeItem('tripTotal');
+            } catch (error) {
+                alert(getApiErrorMessage(error));
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.innerHTML = 'Complete Booking <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            }
         });
     </script>
 </body>
