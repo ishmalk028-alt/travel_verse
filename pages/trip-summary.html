@@ -1,265 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip Summary - TripPlanner</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/main.css">
-    
-    <style>
-        .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .page__header { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%); padding: var(--space-8) 0; color: var(--color-white); }
-        .page__title { font-family: var(--font-secondary); font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-2); }
-        .page__subtitle { opacity: 0.9; }
-        .page__content { flex: 1; padding: var(--space-12) 0; background-color: var(--color-gray-50); }
-        
-        /* Stepper */
-        .stepper { display: flex; justify-content: center; padding: var(--space-4) 0; margin-bottom: var(--space-8); flex-wrap: wrap; gap: var(--space-2); }
-        .stepper__step { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
-        .stepper__step-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background-color: var(--color-white); border: 2px solid var(--color-gray-300); border-radius: var(--radius-full); color: var(--color-gray-400); margin-bottom: var(--space-2); }
-        .stepper__step-icon svg { width: 24px; height: 24px; }
-        .stepper__step-label { font-size: var(--text-xs); font-weight: var(--font-medium); color: var(--color-gray-500); }
-        .stepper__step.is-completed .stepper__step-icon { background-color: var(--color-success); border-color: var(--color-success); color: var(--color-white); }
-        
-        /* Summary Card */
-        .summary-card { background-color: var(--color-white); border-radius: var(--radius-xl); padding: var(--space-8); box-shadow: var(--shadow-lg); margin-bottom: var(--space-8); }
-        .summary-card__header { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-6); border-bottom: 1px solid var(--color-gray-200); }
-        .summary-card__icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background-color: var(--color-primary-100); border-radius: var(--radius-lg); color: var(--color-primary); }
-        .summary-card__icon svg { width: 24px; height: 24px; }
-        .summary-card__title { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-gray-800); }
-        .summary-card__subtitle { font-size: var(--text-sm); color: var(--color-gray-500); }
-        
-        /* Summary Items */
-        .summary-item { display: flex; justify-content: space-between; align-items: flex-start; padding: var(--space-4) 0; border-bottom: 1px solid var(--color-gray-100); }
-        .summary-item:last-child { border-bottom: none; }
-        .summary-item__info { flex: 1; }
-        .summary-item__name { font-weight: var(--font-semibold); color: var(--color-gray-800); margin-bottom: var(--space-1); }
-        .summary-item__details { font-size: var(--text-sm); color: var(--color-gray-500); }
-        .summary-item__price { font-family: var(--font-secondary); font-weight: var(--font-bold); color: var(--color-gray-800); }
-        
-        /* Price Summary */
-        .price-summary { background-color: var(--color-white); border-radius: var(--radius-xl); padding: var(--space-8); box-shadow: var(--shadow-lg); position: sticky; top: 100px; }
-        .price-summary__title { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-gray-800); margin-bottom: var(--space-6); }
-        .price-summary__row { display: flex; justify-content: space-between; padding: var(--space-3) 0; }
-        .price-summary__label { color: var(--color-gray-600); }
-        .price-summary__value { font-weight: var(--font-semibold); color: var(--color-gray-800); }
-        .price-summary__divider { height: 1px; background-color: var(--color-gray-200); margin: var(--space-4) 0; }
-        .price-summary__total { display: flex; justify-content: space-between; padding: var(--space-4) 0; }
-        .price-summary__total .price-summary__label { font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-gray-800); }
-        .price-summary__total .price-summary__value { font-family: var(--font-secondary); font-size: var(--text-3xl); font-weight: var(--font-bold); color: var(--color-primary); }
-        .price-summary__btn { margin-top: var(--space-6); }
-        
-        /* Layout */
-        .page__layout { display: grid; grid-template-columns: 1fr 380px; gap: var(--space-8); align-items: start; }
-        @media (max-width: 1024px) { .page__layout { grid-template-columns: 1fr; } .price-summary { position: static; } }
-        
-        /* Actions */
-        .page__actions { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-6); background-color: var(--color-white); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); }
-        .page__actions .btn { min-width: 150px; }
-        
-        /* Dates Display */
-        .dates-display { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-4); background-color: var(--color-gray-50); border-radius: var(--radius-lg); margin-bottom: var(--space-6); }
-        .dates-display__item { display: flex; flex-direction: column; }
-        .dates-display__label { font-size: var(--text-xs); color: var(--color-gray-500); text-transform: uppercase; letter-spacing: 1px; }
-        .dates-display__value { font-weight: var(--font-semibold); color: var(--color-gray-800); }
-        .dates-display__arrow { color: var(--color-gray-400); }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip Summary — TripPlanner</title>
+  <meta name="description" content="Step 6: Review your complete trip itinerary and expense breakdown before checkout." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>" />
+  <link rel="stylesheet" href="../css/main.css" />
 </head>
-<body>
-    <div class="page">
-        <header class="header is-scrolled">
-            <div class="container">
-                <div class="header__inner">
-                    <a href="../index.html" class="header__logo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                        <span class="header__logo-text">TripPlanner</span>
-                    </a>
-                    <a href="../index.html" class="btn btn--outline">Back to Home</a>
-                </div>
-            </div>
-        </header>
+<body class="planner-page">
 
-        <div class="page__header">
-            <div class="container">
-                <h1 class="page__title">Trip Summary</h1>
-                <p class="page__subtitle">Review your complete trip itinerary</p>
-            </div>
+<header class="site-header">
+  <div class="container">
+    <div class="site-header__inner">
+      <a href="../index.html" class="site-logo">
+        <div class="site-logo__icon">✈️</div>
+        <span class="site-logo__text">TripPlanner</span>
+      </a>
+      <div class="trip-progress">
+        <span class="text-sm text-secondary">Step 6 of 7</span>
+        <div class="trip-progress__bar">
+          <div class="trip-progress__fill" style="width:85%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="planner-stepper-bar">
+  <div class="container"><div id="stepper"></div></div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="planner-layout">
+      <div class="planner-main">
+        <div class="page-header">
+          <button class="page-header__back" onclick="history.back()">← Back</button>
+          <div class="section-tag"><span>📋</span> Step 6</div>
+          <h1 class="page-header__title">Your Trip<br><span class="gradient-text">Summary</span></h1>
+          <p class="page-header__subtitle">Review your complete itinerary before proceeding to checkout.</p>
         </div>
 
-        <main class="page__content">
-            <div class="container">
-                <!-- Stepper -->
-                <div class="stepper">
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Dates</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Countries</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Cities</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Hotels</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Activities</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Summary</span></div>
-                </div>
+        <!-- Summary sections rendered by JS -->
+        <div id="summary-content">
+          <div class="loading-state">
+            <div class="spinner spinner--lg"></div>
+            <span>Building your itinerary...</span>
+          </div>
+        </div>
+      </div>
 
-                <div class="page__layout">
-                    <div>
-                        <!-- Dates -->
-                        <div class="dates-display" id="datesDisplay"></div>
-                        
-                        <!-- Hotels -->
-                        <div class="summary-card">
-                            <div class="summary-card__header">
-                                <div class="summary-card__icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                                </div>
-                                <div>
-                                    <h3 class="summary-card__title">Accommodations</h3>
-                                    <p class="summary-card__subtitle">Your booked hotels</p>
-                                </div>
-                            </div>
-                            <div id="hotelslist"></div>
-                        </div>
-                        
-                        <!-- Entertainment -->
-                        <div class="summary-card" id="entertainmentCard">
-                            <div class="summary-card__header">
-                                <div class="summary-card__icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                </div>
-                                <div>
-                                    <h3 class="summary-card__title">Activities</h3>
-                                    <p class="summary-card__subtitle">Pre-booked entertainment</p>
-                                </div>
-                            </div>
-                            <div id="entertainmentList"></div>
-                        </div>
-                        
-                        <div class="page__actions">
-                            <a href="select-entertainment.html" class="btn btn--outline">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                                Back
-                            </a>
-                            <button type="button" class="btn btn--primary" id="continueBtn">
-                                Proceed to Checkout
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="price-summary">
-                        <h3 class="price-summary__title">Price Breakdown</h3>
-                        <div class="price-summary__row">
-                            <span class="price-summary__label">Hotels</span>
-                            <span class="price-summary__value" id="totalHotels">$0</span>
-                        </div>
-                        <div class="price-summary__row">
-                            <span class="price-summary__label">Activities</span>
-                            <span class="price-summary__value" id="totalActivities">$0</span>
-                        </div>
-                        <div class="price-summary__row" style="color: var(--color-gray-400); font-size: 14px;">
-                            <span class="price-summary__label">Service Fee</span>
-                            <span class="price-summary__value" id="serviceFee">$0</span>
-                        </div>
-                        <div class="price-summary__divider"></div>
-                        <div class="price-summary__total">
-                            <span class="price-summary__label">Total</span>
-                            <span class="price-summary__value" id="grandTotal">$0</span>
-                        </div>
-                        <button class="btn btn--primary btn--block price-summary__btn" id="checkoutBtn">
-                            Proceed to Checkout
-                        </button>
-                    </div>
-                </div>
+      <!-- Cost sidebar -->
+      <aside class="planner-sidebar">
+        <div class="expense-sidebar">
+          <div class="expense-sidebar__header">
+            <div class="expense-sidebar__title">💰 Cost Breakdown</div>
+          </div>
+          <div class="expense-sidebar__body" id="cost-breakdown">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="expense-total">
+            <span class="expense-total__label">Grand Total</span>
+            <span class="expense-total__amount" id="grand-total">$0</span>
+          </div>
+        </div>
+
+        <!-- Edit links -->
+        <div class="card mt-4">
+          <div class="card__body">
+            <h3 class="text-sm font-bold mb-3">✏️ Edit Your Trip</h3>
+            <div class="flex flex-col gap-2">
+              <a href="select-dates.html"        class="btn btn--ghost btn--sm" style="justify-content:flex-start">📅 Change Dates</a>
+              <a href="select-countries.html"    class="btn btn--ghost btn--sm" style="justify-content:flex-start">🌍 Change Countries</a>
+              <a href="select-cities.html"       class="btn btn--ghost btn--sm" style="justify-content:flex-start">🏙️ Change Cities</a>
+              <a href="select-hotels.html"       class="btn btn--ghost btn--sm" style="justify-content:flex-start">🏨 Change Hotels</a>
+              <a href="select-entertainment.html" class="btn btn--ghost btn--sm" style="justify-content:flex-start">🎭 Change Activities</a>
             </div>
-        </main>
+          </div>
+        </div>
+      </aside>
     </div>
 
-    <script>
-        // Load all data
-        const dates = JSON.parse(localStorage.getItem('tripDates') || '{}');
-        const hotels = JSON.parse(localStorage.getItem('tripHotels') || '[]');
-        const entertainment = JSON.parse(localStorage.getItem('tripEntertainment') || '[]');
-        
-        // Format date
-        function formatDate(dateStr) {
-            if (!dateStr) return 'Not set';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-        }
-        
-        // Render dates
-        document.getElementById('datesDisplay').innerHTML = `
-            <div class="dates-display__item">
-                <span class="dates-display__label">Departure</span>
-                <span class="dates-display__value">${formatDate(dates.startDate)}</span>
+    <div class="step-nav">
+      <button class="btn btn--ghost" onclick="history.back()">← Back</button>
+      <a href="checkout.html" class="btn btn--primary btn--lg" id="checkout-btn">
+        Proceed to Checkout →
+      </a>
+    </div>
+  </div>
+</main>
+
+<div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+
+<script type="module">
+  import { tripPlannerVM } from '../js/viewmodels/TripPlannerVM.js';
+  import { renderStepper } from '../js/app.js';
+  import { formatCurrency, formatDateRange, formatNights } from '../js/utils/formatters.js';
+
+  renderStepper(6, document.getElementById('stepper'));
+
+  const trip     = tripPlannerVM.trip;
+  const content  = document.getElementById('summary-content');
+  const costEl   = document.getElementById('cost-breakdown');
+  const totalEl  = document.getElementById('grand-total');
+
+  // Build summary
+  const sections = [];
+
+  // Dates section
+  if (trip.startDate) {
+    sections.push(`
+      <div class="summary-section">
+        <div class="summary-section__header">
+          <span class="summary-section__title">📅 Travel Dates</span>
+        </div>
+        <div class="summary-section__body">
+          <div class="summary-item">
+            <div class="summary-item__icon">🗓️</div>
+            <div class="summary-item__content">
+              <div class="summary-item__title">${formatDateRange(trip.startDate, trip.endDate)}</div>
+              <div class="summary-item__detail">${trip.durationDays} days total</div>
             </div>
-            <span class="dates-display__arrow">→</span>
-            <div class="dates-display__item">
-                <span class="dates-display__label">Return</span>
-                <span class="dates-display__value">${formatDate(dates.endDate)}</span>
+          </div>
+        </div>
+      </div>`);
+  }
+
+  // Countries & Cities
+  if (trip.countries.length) {
+    const citiesHTML = trip.cities.map(city => {
+      const country = trip.countries.find(c => c.id === city.countryId);
+      const hotel   = trip.hotels.find(h => h.cityId === city.id);
+      const activities = trip.entertainment.filter(e => e.cityId === city.id);
+      return `
+        <div class="summary-item">
+          <div class="summary-item__icon">${country?.flag || '🏙️'}</div>
+          <div class="summary-item__content">
+            <div class="summary-item__title">${city.name}, ${country?.name}</div>
+            <div class="summary-item__detail">${formatNights(city.nights)}
+              ${hotel ? ` · <span style="color:var(--color-primary-light)">🏨 ${hotel.hotel.name}</span>` : ' · <span style="color:var(--color-error)">No hotel selected</span>'}
+              ${activities.length ? ` · 🎭 ${activities.length} activit${activities.length === 1 ? 'y' : 'ies'}` : ''}
             </div>
-        `;
-        
-        // Render hotels
-        let hotelTotal = 0;
-        document.getElementById('hotelslist').innerHTML = hotels.map(hotel => {
-            hotelTotal += hotel.total;
+          </div>
+          ${hotel ? `<div class="summary-item__price">${formatCurrency(hotel.hotel.pricePerNight * city.nights)}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    sections.push(`
+      <div class="summary-section">
+        <div class="summary-section__header">
+          <span class="summary-section__title">🗺️ Itinerary (${trip.countries.length} ${trip.countries.length === 1 ? 'Country' : 'Countries'}, ${trip.cities.length} ${trip.cities.length === 1 ? 'City' : 'Cities'})</span>
+        </div>
+        <div class="summary-section__body">${citiesHTML || '<p class="text-secondary text-sm">No cities selected.</p>'}</div>
+      </div>`);
+  }
+
+  // Hotels
+  if (trip.hotels.length) {
+    sections.push(`
+      <div class="summary-section">
+        <div class="summary-section__header">
+          <span class="summary-section__title">🏨 Hotels (${trip.hotels.length})</span>
+        </div>
+        <div class="summary-section__body">
+          ${trip.hotels.map(h => {
+            const city = trip.cities.find(c => c.id === h.cityId);
             return `
-                <div class="summary-item">
-                    <div class="summary-item__info">
-                        <div class="summary-item__name">${hotel.hotelName}</div>
-                        <div class="summary-item__details">${hotel.nights} nights × $${hotel.pricePerNight}/night</div>
-                    </div>
-                    <div class="summary-item__price">$${hotel.total}</div>
+              <div class="summary-item">
+                <div class="summary-item__icon">🏨</div>
+                <div class="summary-item__content">
+                  <div class="summary-item__title">${h.hotel.name}</div>
+                  <div class="summary-item__detail">${city?.name || ''} · ${'★'.repeat(h.hotel.starRating)} · ${formatNights(h.nights)} · ${formatCurrency(h.hotel.pricePerNight)}/night</div>
                 </div>
-            `;
-        }).join('') || '<p style="color: var(--color-gray-500);">No hotels selected</p>';
-        
-        // Render entertainment
-        let activityTotal = 0;
-        const entertainmentCard = document.getElementById('entertainmentCard');
-        if (entertainment.length > 0) {
-            document.getElementById('entertainmentList').innerHTML = entertainment.map(item => {
-                activityTotal += item.price;
-                return `
-                    <div class="summary-item">
-                        <div class="summary-item__info">
-                            <div class="summary-item__name">${item.name}</div>
-                        </div>
-                        <div class="summary-item__price">${item.price > 0 ? '$' + item.price : 'Free'}</div>
-                    </div>
-                `;
-            }).join('');
-        } else {
-            entertainmentCard.style.display = 'none';
-        }
-        
-        // Calculate totals
-        const serviceFee = Math.round((hotelTotal + activityTotal) * 0.05);
-        const grandTotal = hotelTotal + activityTotal + serviceFee;
-        
-        document.getElementById('totalHotels').textContent = `$${hotelTotal}`;
-        document.getElementById('totalActivities').textContent = `$${activityTotal}`;
-        document.getElementById('serviceFee').textContent = `$${serviceFee}`;
-        document.getElementById('grandTotal').textContent = `$${grandTotal}`;
-        
-        // Save total
-        localStorage.setItem('tripTotal', JSON.stringify({
-            hotels: hotelTotal,
-            activities: activityTotal,
-            serviceFee: serviceFee,
-            total: grandTotal
-        }));
-        
-        // Checkout buttons
-        document.getElementById('continueBtn').addEventListener('click', () => {
-            window.location.href = 'checkout.html';
-        });
-        
-        document.getElementById('checkoutBtn').addEventListener('click', () => {
-            window.location.href = 'checkout.html';
-        });
-    </script>
+                <div class="summary-item__price">${formatCurrency(h.hotel.pricePerNight * h.nights)}</div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`);
+  }
+
+  // Entertainment
+  if (trip.entertainment.length) {
+    sections.push(`
+      <div class="summary-section">
+        <div class="summary-section__header">
+          <span class="summary-section__title">🎭 Activities (${trip.entertainment.length})</span>
+        </div>
+        <div class="summary-section__body">
+          ${trip.entertainment.map(e => `
+            <div class="summary-item">
+              <div class="summary-item__icon">${e.emoji}</div>
+              <div class="summary-item__content">
+                <div class="summary-item__title">${e.name}</div>
+                <div class="summary-item__detail">${e.cityName} · ${e.type} · ${e.duration}</div>
+              </div>
+              <div class="summary-item__price">${formatCurrency(e.price)}</div>
+            </div>`).join('')}
+        </div>
+      </div>`);
+  }
+
+  content.innerHTML = sections.length
+    ? sections.join('')
+    : `<div class="empty-state">
+         <div class="empty-state__icon">📋</div>
+         <div class="empty-state__title">No trip data yet</div>
+         <p class="text-secondary mb-6">Start from the beginning to plan your trip.</p>
+         <a href="select-dates.html" class="btn btn--primary">Start Planning</a>
+       </div>`;
+
+  // Cost breakdown
+  const { hotelsCost, entertainmentCost, serviceFee, total } = tripPlannerVM.getCostBreakdown();
+  costEl.innerHTML = `
+    <div class="expense-row"><span class="expense-row__label">🏨 Hotels</span><span class="expense-row__value">${formatCurrency(hotelsCost)}</span></div>
+    <div class="expense-row"><span class="expense-row__label">🎭 Activities</span><span class="expense-row__value">${formatCurrency(entertainmentCost)}</span></div>
+    <div class="expense-row"><span class="expense-row__label">🔧 Service Fee (5%)</span><span class="expense-row__value">${formatCurrency(serviceFee)}</span></div>`;
+  totalEl.textContent = formatCurrency(total);
+</script>
 </body>
 </html>

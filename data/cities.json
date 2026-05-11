@@ -1,0 +1,152 @@
+[
+  {
+    "id": 1,
+    "countryId": 1,
+    "name": "Paris",
+    "description": "The City of Light — iconic monuments, world-class museums, and the finest cafés in the world.",
+    "imageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80",
+    "highlights": ["Eiffel Tower", "Louvre", "Notre-Dame", "Montmartre"],
+    "timezone": "CET",
+    "bestFor": "Art & Culture"
+  },
+  {
+    "id": 2,
+    "countryId": 1,
+    "name": "Nice",
+    "description": "The jewel of the French Riviera, with its stunning Promenade des Anglais and vibrant markets.",
+    "imageUrl": "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=600&q=80",
+    "highlights": ["Promenade des Anglais", "Old Town", "Castle Hill", "Matisse Museum"],
+    "timezone": "CET",
+    "bestFor": "Beach & Relaxation"
+  },
+  {
+    "id": 3,
+    "countryId": 1,
+    "name": "Lyon",
+    "description": "Gastronomy capital of France, known for its Renaissance Old Town and legendary bouchon restaurants.",
+    "imageUrl": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+    "highlights": ["Vieux Lyon", "Fourvière Basilica", "Les Halles", "Musée des Beaux-Arts"],
+    "timezone": "CET",
+    "bestFor": "Food & History"
+  },
+  {
+    "id": 4,
+    "countryId": 2,
+    "name": "Tokyo",
+    "description": "A dazzling metropolis where ancient shrines stand beside neon-lit skyscrapers and world-leading technology.",
+    "imageUrl": "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=600&q=80",
+    "highlights": ["Shibuya Crossing", "Senso-ji", "Akihabara", "Shinjuku"],
+    "timezone": "JST",
+    "bestFor": "Urban Exploration"
+  },
+  {
+    "id": 5,
+    "countryId": 2,
+    "name": "Kyoto",
+    "description": "Japan's cultural heart — thousands of temples, traditional geisha districts, and serene bamboo groves.",
+    "imageUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80",
+    "highlights": ["Fushimi Inari", "Arashiyama", "Kinkaku-ji", "Gion District"],
+    "timezone": "JST",
+    "bestFor": "Heritage & Nature"
+  },
+  {
+    "id": 6,
+    "countryId": 2,
+    "name": "Osaka",
+    "description": "Japan's kitchen — vibrant street food culture, electric nightlife, and the mighty Osaka Castle.",
+    "imageUrl": "https://images.unsplash.com/photo-1527668752968-14dc70a27c95?w=600&q=80",
+    "highlights": ["Dotonbori", "Osaka Castle", "Namba", "Universal Studios"],
+    "timezone": "JST",
+    "bestFor": "Food & Nightlife"
+  },
+  {
+    "id": 7,
+    "countryId": 3,
+    "name": "Rome",
+    "description": "The Eternal City — ancient ruins, baroque fountains, and the living museum of Western civilization.",
+    "imageUrl": "https://images.unsplash.com/photo-1552832230-c0197DD subst00-q=80&url=https://images.unsplash.com/photo-1555992336-fb0d29498b13?w=600&q=80",
+    "highlights": ["Colosseum", "Vatican", "Trevi Fountain", "Roman Forum"],
+    "timezone": "CET",
+    "bestFor": "History & Architecture"
+  },
+  {
+    "id": 8,
+    "countryId": 3,
+    "name": "Venice",
+    "description": "A floating masterpiece of canals, Gothic palaces, and Renaissance art unlike anywhere on earth.",
+    "imageUrl": "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?w=600&q=80",
+    "highlights": ["Grand Canal", "St. Mark's Basilica", "Doge's Palace", "Murano Glass"],
+    "timezone": "CET",
+    "bestFor": "Romance & Art"
+  },
+  {
+    "id": 9,
+    "countryId": 3,
+    "name": "Florence",
+    "description": "The cradle of the Renaissance — Michelangelo's David, Botticelli's Venus, and Brunelleschi's Dome.",
+    "imageUrl": "https://images.unsplash.com/photo-1543429258-eb2816e7baa1?w=600&q=80",
+    "highlights": ["Uffizi Gallery", "Duomo", "Ponte Vecchio", "Piazzale Michelangelo"],
+    "timezone": "CET",
+    "bestFor": "Art & Culture"
+  },
+  {
+    "id": 10,
+    "countryId": 4,
+    "name": "Dubai",
+    "description": "The city of superlatives — tallest buildings, grandest malls, and a desert that stretches to the horizon.",
+    "imageUrl": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80",
+    "highlights": ["Burj Khalifa", "Dubai Mall", "Dubai Creek", "Palm Jumeirah"],
+    "timezone": "GST",
+    "bestFor": "Luxury & Shopping"
+  },
+  {
+    "id": 11,
+    "countryId": 4,
+    "name": "Abu Dhabi",
+    "description": "The UAE's cultured capital — stunning Sheikh Zayed Mosque, Ferrari World, and Louvre Abu Dhabi.",
+    "imageUrl": "https://images.unsplash.com/photo-1533395427226-788cee21cc9e?w=600&q=80",
+    "highlights": ["Sheikh Zayed Mosque", "Louvre Abu Dhabi", "Ferrari World", "Corniche"],
+    "timezone": "GST",
+    "bestFor": "Culture & Luxury"
+  },
+  {
+    "id": 12,
+    "countryId": 5,
+    "name": "Santorini",
+    "description": "Iconic blue-domed churches, caldera sunsets, and volcanic beaches on the most romantic island on earth.",
+    "imageUrl": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600&q=80",
+    "highlights": ["Oia Village", "Akrotiri", "Red Beach", "Caldera Views"],
+    "timezone": "EET",
+    "bestFor": "Romance & Views"
+  },
+  {
+    "id": 13,
+    "countryId": 5,
+    "name": "Athens",
+    "description": "The birthplace of democracy, philosophy, and the Olympic games. The Acropolis reigns supreme.",
+    "imageUrl": "https://images.unsplash.com/photo-1555993539-1732b0258235?w=600&q=80",
+    "highlights": ["Acropolis", "Plaka", "National Museum", "Monastiraki"],
+    "timezone": "EET",
+    "bestFor": "History & Culture"
+  },
+  {
+    "id": 14,
+    "countryId": 6,
+    "name": "Bangkok",
+    "description": "A sensory overload of golden temples, floating markets, sky-high rooftop bars, and legendary street food.",
+    "imageUrl": "https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=600&q=80",
+    "highlights": ["Grand Palace", "Wat Pho", "Chatuchak Market", "Khao San Road"],
+    "timezone": "ICT",
+    "bestFor": "Food & Culture"
+  },
+  {
+    "id": 15,
+    "countryId": 6,
+    "name": "Chiang Mai",
+    "description": "Northern Thailand's cultural gem — ancient temples, elephant sanctuaries, and vibrant night bazaars.",
+    "imageUrl": "https://images.unsplash.com/photo-1548018560-c7196548ea4b?w=600&q=80",
+    "highlights": ["Doi Suthep", "Night Bazaar", "Elephant Sanctuary", "Old City Moat"],
+    "timezone": "ICT",
+    "bestFor": "Nature & Culture"
+  }
+]

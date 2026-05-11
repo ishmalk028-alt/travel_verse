@@ -1,786 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Plan your perfect trip with TripPlanner. Select destinations, book hotels, and discover amazing entertainment spots with total expense calculation.">
-    
-    <title>TripPlanner - Plan Your Perfect Trip</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/main.css">
-    
-    <style>
-        /* Hero Section */
-        .hero {
-            position: relative;
-            min-height: 100vh;
-            display: flex;
-            
-            align-items: center;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
-            overflow: hidden;
-        }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></svg>');
-            background-size: 50px 50px;
-        }
-        
-        .hero__content {
-            position: relative;
-            z-index: 1;
-            max-width: 600px;
-            color: var(--color-white);
-        }
-        
-        .hero__badge {
-            display: inline-block;
-            padding: var(--space-2) var(--space-4);
-            background-color: rgba(255, 255, 255, 0.15);
-            border-radius: var(--radius-full);
-            font-size: var(--text-sm);
-            font-weight: var(--font-medium);
-            margin-bottom: var(--space-6);
-        }
-        
-        .hero__title {
-            font-family: var(--font-secondary);
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: var(--font-bold);
-            line-height: 1.1;
-            margin-bottom: var(--space-6);
-        }
-        
-        .hero__title span {
-            color: var(--color-accent);
-        }
-        
-        .hero__subtitle {
-            font-size: var(--text-lg);
-            opacity: 0.9;
-            margin-bottom: var(--space-8);
-            line-height: 1.7;
-        }
-     .hero__actions {
-            display: flex;
-            gap: var(--space-4);
-            flex-wrap: wrap;
-        }
-        
-        .hero__btn-primary {
-            padding: var(--space-4) var(--space-8);
-            background-color: var(--color-white);
-            color: var(--color-primary);
-            font-weight: var(--font-semibold);
-            border-radius: var(--radius-xl);
-            transition: all var(--transition-fast);
-        }
-        
-        .hero__btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        .hero__btn-secondary {
-            padding: var(--space-4) var(--space-8);
-            background-color: transparent;
-            color: var(--color-white);
-            font-weight: var(--font-semibold);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: var(--radius-xl);
-            transition: all var(--transition-fast);
-        }
-        
-        .hero__btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-        
-        .hero__image {
-            position: absolute;
-            right: -100px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 600px;
-            height: 600px;
-            opacity: 0.1;
-        }
-        
-        @media (min-width: 1024px) {
-            .hero__image {
-                opacity: 1;
-                right: 5%;
-                width: 500px;
-                height: auto;
-            }
-        }
-        
-        /* Stats Section */
-        .hero__stats {
-            display: flex;
-            gap: var(--space-8);
-            margin-top: var(--space-12);
-            padding-top: var(--space-8);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .hero__stat {
-            text-align: left;
-        }
-        
-        .hero__stat-value {
-            font-family: var(--font-secondary);
-            font-size: var(--text-3xl);
-            font-weight: var(--font-bold);
-        }
-        
-        .hero__stat-label {
-            font-size: var(--text-sm);
-            opacity: 0.8;
-        }
-        
-        /* Features Section */
-        .features {
-            padding: var(--space-20) 0;
-            background-color: var(--color-gray-50);
-        }
-        
-        .features__header {
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto var(--space-16);
-        }
-        
-        .features__label {
-            display: inline-block;
-            padding: var(--space-1) var(--space-3);
-            background-color: var(--color-primary-100);
-            color: var(--color-primary);
-            font-size: var(--text-sm);
-            font-weight: var(--font-semibold);
-            border-radius: var(--radius-full);
-            margin-bottom: var(--space-4);
-        }
-        
-        .features__title {
-            font-family: var(--font-secondary);
-            font-size: var(--text-4xl);
-            font-weight: var(--font-bold);
-            color: var(--color-gray-800);
-            margin-bottom: var(--space-4);
-        }
-        
-        .features__subtitle {
-            color: var(--color-gray-600);
-            font-size: var(--text-lg);
-        }
-        
-        .features__grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: var(--space-8);
-        }
-        
-        .feature-card {
-            background-color: var(--color-white);
-            padding: var(--space-8);
-            border-radius: var(--radius-2xl);
-            box-shadow: var(--shadow-md);
-            transition: all var(--transition-normal);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-        }
-        
-        .feature-card__icon {
-            width: 64px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--color-primary-100) 0%, var(--color-primary-50) 100%);
-            border-radius: var(--radius-xl);
-            margin-bottom: var(--space-5);
-        }
-        
-        .feature-card__icon svg {
-            width: 32px;
-            height: 32px;
-            color: var(--color-primary);
-        }
-        
-        .feature-card__title {
-            font-family: var(--font-secondary);
-            font-size: var(--text-xl);
-            font-weight: var(--font-semibold);
-            color: var(--color-gray-800);
-            margin-bottom: var(--space-3);
-        }
-        
-        .feature-card__text {
-            color: var(--color-gray-600);
-            line-height: 1.7;
-        }
-        
-        /* How It Works Section */
-        .how-it-works {
-            padding: var(--space-20) 0;
-        }
-        
-        .how-it-works__header {
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto var(--space-16);
-        }
-        
-        .how-it-works__steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--space-8);
-            position: relative;
-        }
-        
-        .step {
-            text-align: center;
-            position: relative;
-        }
-        
-        .step__number {
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
-            color: var(--color-white);
-            font-family: var(--font-secondary);
-            font-size: var(--text-2xl);
-            font-weight: var(--font-bold);
-            border-radius: var(--radius-full);
-            margin: 0 auto var(--space-6);
-            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
-        }
-        
-        .step__title {
-            font-family: var(--font-secondary);
-            font-size: var(--text-xl);
-            font-weight: var(--font-semibold);
-            color: var(--color-gray-800);
-            margin-bottom: var(--space-3);
-        }
-        
-        .step__text {
-            color: var(--color-gray-600);
-            max-width: 250px;
-            margin: 0 auto;
-        }
-        
-        /* Destinations Section */
-        .destinations {
-            padding: var(--space-20) 0;
-            background-color: var(--color-gray-50);
-        }
-        
-        .destinations__header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: var(--space-12);
-            flex-wrap: wrap;
-            gap: var(--space-4);
-        }
-        
-        .destinations__grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: var(--space-6);
-        }
-        
-        .destination-card {
-            position: relative;
-            border-radius: var(--radius-2xl);
-            overflow: hidden;
-            cursor: pointer;
-        }
-        
-        .destination-card__image {
-            width: 100%;
-            height: 320px;
-            object-fit: cover;
-            transition: transform var(--transition-slow);
-        }
-        
-        .destination-card:hover .destination-card__image {
-            transform: scale(1.1);
-        }
-        
-        .destination-card__overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: var(--space-6);
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-            color: var(--color-white);
-        }
-        
-        .destination-card__name {
-            font-family: var(--font-secondary);
-            font-size: var(--text-2xl);
-            font-weight: var(--font-bold);
-            margin-bottom: var(--space-1);
-        }
-        
-        .destination-card__info {
-            font-size: var(--text-sm);
-            opacity: 0.9;
-        }
-        
-        /* CTA Section */
-        .cta {
-            padding: var(--space-20) 0;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%);
-            text-align: center;
-            color: var(--color-white);
-        }
-        
-        .cta__title {
-            font-family: var(--font-secondary);
-            font-size: var(--text-4xl);
-            font-weight: var(--font-bold);
-            margin-bottom: var(--space-4);
-        }
-        
-        .cta__subtitle {
-            font-size: var(--text-lg);
-            opacity: 0.9;
-            margin-bottom: var(--space-8);
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .cta__btn {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-2);
-            padding: var(--space-4) var(--space-8);
-            background-color: var(--color-white);
-            color: var(--color-primary);
-            font-weight: var(--font-semibold);
-            border-radius: var(--radius-xl);
-            transition: all var(--transition-fast);
-        }
-        
-        .cta__btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TripPlanner — Plan Your Perfect Journey</title>
+  <meta name="description" content="TripPlanner is your all-in-one travel planning companion. Select destinations, book hotels, discover activities, and calculate your budget — all in one beautiful app." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="TripPlanner — Plan Your Perfect Journey" />
+  <meta property="og:description" content="Multi-step trip planner for booking countries, cities, hotels, and activities." />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>" />
+  <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
-        <!-- Header -->
-        <header class="header" id="header" style="background:rgba(255,255,255,0.95);box-shadow:0 2px 16px rgba(37,99,235,0.06);backdrop-filter:blur(8px);">
-            <div class="container">
-                <div class="header__inner" style="display:flex;align-items:center;justify-content:space-between;min-height:72px;">
-                    <a href="index.html" class="header__logo" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-                        <svg class="header__logo-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40" style="color:var(--color-primary)">
-                            <circle cx="16" cy="16" r="14" stroke="var(--color-primary)" stroke-width="2.5" fill="none"/>
-                            <path d="M8 20 L16 10 L24 20" stroke="var(--color-accent)" stroke-width="2.5" fill="none"/>
-                            <circle cx="16" cy="16" r="3" fill="var(--color-accent)"/>
-                        </svg>
-                        <span class="header__logo-text" style="font-family:var(--font-secondary);font-size:2rem;font-weight:700;color:var(--color-primary)">TravelVerse</span>
-                    </a>
-                    <nav class="header__nav" id="mainNav" style="flex:1;display:flex;justify-content:center;">
-                        <ul class="header__nav-list" style="display:flex;gap:2.5rem;list-style:none;margin:0;padding:0;">
-                            <li><a href="#features" class="header__nav-link" style="font-weight:500;color:var(--color-gray-700);font-size:1.1rem;transition:color .2s;">Features</a></li>
-                            <li><a href="#how-it-works" class="header__nav-link" style="font-weight:500;color:var(--color-gray-700);font-size:1.1rem;transition:color .2s;">How It Works</a></li>
-                            <li><a href="#destinations" class="header__nav-link" style="font-weight:500;color:var(--color-gray-700);font-size:1.1rem;transition:color .2s;">Destinations</a></li>
-                        </ul>
-                    </nav>
-                    <div class="header__actions" style="display:flex;align-items:center;gap:1.5rem;">
-                        <a href="pages/select-dates.html" class="btn btn--primary" style="padding:0.75rem 2rem;font-size:1rem;font-weight:600;border-radius:2rem;background:linear-gradient(90deg,var(--color-primary),var(--color-accent));color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.10);transition:box-shadow .2s,transform .2s;">Start Planning</a>
-                        <button class="header__menu-toggle" id="menuToggle" aria-label="Toggle menu" style="background:none;border:none;outline:none;display:none;flex-direction:column;gap:5px;cursor:pointer;">
-                            <span class="header__menu-icon" style="display:block;width:28px;height:3px;background:var(--color-primary);border-radius:2px;"></span>
-                            <span class="header__menu-icon" style="display:block;width:28px;height:3px;background:var(--color-primary);border-radius:2px;"></span>
-                            <span class="header__menu-icon" style="display:block;width:28px;height:3px;background:var(--color-primary);border-radius:2px;"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="header__mobile-nav" id="mobileNav" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(255,255,255,0.98);z-index:1000;flex-direction:column;align-items:center;justify-content:center;">
-                <nav class="header__mobile-nav-inner">
-                    <ul class="header__mobile-nav-list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2rem;align-items:center;">
-                        <li><a href="#features" class="header__mobile-nav-link" style="font-size:1.3rem;font-weight:600;color:var(--color-primary)">Features</a></li>
-                        <li><a href="#how-it-works" class="header__mobile-nav-link" style="font-size:1.3rem;font-weight:600;color:var(--color-primary)">How It Works</a></li>
-                        <li><a href="#destinations" class="header__mobile-nav-link" style="font-size:1.3rem;font-weight:600;color:var(--color-primary)">Destinations</a></li>
-                        <li><a href="pages/select-dates.html" class="btn btn--primary btn--block" style="padding:1rem 2.5rem;font-size:1.1rem;border-radius:2rem;background:linear-gradient(90deg,var(--color-primary),var(--color-accent));color:#fff;">Start Planning</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero__content">
-                <span class="hero__badge">✈️ Plan Your Adventure</span>
-                <h1 class="hero__title">
-                    Discover the World, <span>One Trip at a Time</span>
-                </h1>
-                <p class="hero__subtitle">
-                    Plan your perfect trip with ease. Select destinations, book hotels, discover entertainment spots, and track your expenses — all in one place.
-                </p>
-                <div class="hero__actions">
-                    <a href="pages/select-dates.html" class="hero__btn-primary">
-                        Start Planning Now
-                    </a>
-                    <a href="#how-it-works" class="hero__btn-secondary">
-                        Learn More
-                    </a>
-                </div>
-                
-                <div class="hero__stats">
-                    <div class="hero__stat">
-                        <div class="hero__stat-value">50+</div>
-                        <div class="hero__stat-label">Countries</div>
-                    </div>
-                    <div class="hero__stat">
-                        <div class="hero__stat-value">500+</div>
-                        <div class="hero__stat-label">Hotels</div>
-                    </div>
-                    <div class="hero__stat">
-                        <div class="hero__stat-value">1000+</div>
-                        <div class="hero__stat-label">Activities</div>
-                    </div>
-                </div>
-            </div>
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header class="site-header" id="site-header">
+  <div class="container">
+    <div class="site-header__inner">
+      <a href="index.html" class="site-logo" id="logo">
+        <div class="site-logo__icon">✈️</div>
+        <span class="site-logo__text">TripPlanner</span>
+      </a>
+
+      <nav class="site-nav" id="site-nav" role="navigation" aria-label="Main navigation">
+        <a href="#features"     class="site-nav__link">Features</a>
+        <a href="#how-it-works" class="site-nav__link">How It Works</a>
+        <a href="#destinations" class="site-nav__link">Destinations</a>
+        <a href="pages/select-dates.html" class="btn btn--primary btn--sm" id="nav-start-btn">Start Planning</a>
+      </nav>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero" id="hero" aria-label="Hero section">
+  <div class="hero__bg">
+    <img
+      src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1600&q=80"
+      alt="Beautiful travel destination"
+      class="hero__bg-image"
+      loading="eager"
+    />
+    <div class="hero__bg-gradient"></div>
+  </div>
+
+  <!-- Animated orbs -->
+  <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+  <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+  <div class="hero__orb hero__orb--3" aria-hidden="true"></div>
+
+  <div class="container hero__content">
+    <div class="hero__eyebrow">
+      <span class="hero__eyebrow-dot" aria-hidden="true"></span>
+      ✨ Your Journey Starts Here
+    </div>
+
+    <h1 class="hero__title">
+      <span class="hero__title-line">Plan Your</span>
+      <span class="hero__title-line gradient-text">Dream Trip</span>
+      <span class="hero__title-line">In Minutes</span>
+    </h1>
+
+    <p class="hero__description">
+      Select destinations, book hotels, discover activities, and calculate your total budget
+      — all in one beautifully designed travel planner.
+    </p>
+
+    <div class="hero__cta">
+      <a href="pages/select-dates.html" class="btn btn--primary btn--xl" id="hero-start-btn">
+        ✈️ Start Planning My Trip
+      </a>
+      <a href="#how-it-works" class="btn btn--secondary btn--xl" id="hero-learn-btn">
+        How It Works
+      </a>
+    </div>
+
+    <div class="hero__stats">
+      <div class="hero__stat">
+        <div class="hero__stat-value">8+</div>
+        <div class="hero__stat-label">Countries</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">15+</div>
+        <div class="hero__stat-label">Cities</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">50+</div>
+        <div class="hero__stat-label">Hotels</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">100%</div>
+        <div class="hero__stat-label">Free to Plan</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="hero__scroll" aria-hidden="true">
+    <div class="hero__scroll-icon">
+      <div class="hero__scroll-dot"></div>
+    </div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ═══════════════════ FEATURES ═══════════════════ -->
+<section class="features" id="features" aria-label="Features">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-tag">
+        <span>⚡</span> Features
+      </div>
+      <h2 class="section-title">
+        Everything You Need to<br>
+        <span class="gradient-text">Plan the Perfect Trip</span>
+      </h2>
+      <p class="section-subtitle mx-auto">
+        From selecting dates to confirming your booking, we guide you through every step
+        with smart tools and beautiful data.
+      </p>
+    </div>
+
+    <div class="features__grid">
+      <div class="feature-card">
+        <div class="feature-card__icon">📅</div>
+        <h3 class="feature-card__title">Smart Date Selection</h3>
+        <p class="feature-card__text">
+          Pick your travel window with our intuitive date picker. Instantly see your trip duration
+          and plan accordingly.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">🌍</div>
+        <h3 class="feature-card__title">Multi-Country Planning</h3>
+        <p class="feature-card__text">
+          Select one or multiple countries for your trip. Explore continents and mix destinations
+          for the ultimate adventure.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">🏙️</div>
+        <h3 class="feature-card__title">City-by-City Itinerary</h3>
+        <p class="feature-card__text">
+          Choose cities within each country and allocate nights flexibly. Your itinerary adapts
+          to your schedule.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">🏨</div>
+        <h3 class="feature-card__title">Hotel Booking</h3>
+        <p class="feature-card__text">
+          Browse curated hotels with ratings, amenities, and pricing. Filter by stars and budget
+          to find your perfect stay.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">🎭</div>
+        <h3 class="feature-card__title">Activity Pre-Booking</h3>
+        <p class="feature-card__text">
+          Discover and pre-book tours, experiences, and local adventures. From Eiffel Tower tours
+          to desert safaris.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">💰</div>
+        <h3 class="feature-card__title">Real-Time Budget</h3>
+        <p class="feature-card__text">
+          Watch your expenses update in real-time as you plan. Full breakdown of hotels, activities,
+          and service fees.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<section class="how-it-works" id="how-it-works" aria-label="How it works">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-tag">
+        <span>🗺️</span> Process
+      </div>
+      <h2 class="section-title">
+        Your Trip in<br>
+        <span class="gradient-text">6 Simple Steps</span>
+      </h2>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-card__number">1</div>
+        <h3 class="step-card__title">Pick Your Dates</h3>
+        <p class="step-card__text">Choose when your adventure begins and ends.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card__number">2</div>
+        <h3 class="step-card__title">Select Countries</h3>
+        <p class="step-card__text">Browse 8+ countries across multiple continents.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card__number">3</div>
+        <h3 class="step-card__title">Choose Cities</h3>
+        <p class="step-card__text">Pick cities and set how many nights you'll stay.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card__number">4</div>
+        <h3 class="step-card__title">Book Hotels</h3>
+        <p class="step-card__text">Select from curated hotels in each city.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card__number">5</div>
+        <h3 class="step-card__title">Add Activities</h3>
+        <p class="step-card__text">Pre-book tours, experiences, and attractions.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card__number">6</div>
+        <h3 class="step-card__title">Checkout</h3>
+        <p class="step-card__text">Review your full itinerary and confirm your booking.</p>
+      </div>
+    </div>
+
+    <div class="text-center mt-12">
+      <a href="pages/select-dates.html" class="btn btn--primary btn--xl" id="steps-start-btn">
+        Begin Your Journey →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ DESTINATIONS ═══════════════════ -->
+<section class="destinations" id="destinations" aria-label="Popular destinations">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-tag">
+        <span>📍</span> Destinations
+      </div>
+      <h2 class="section-title">
+        Explore the<br>
+        <span class="gradient-text">World's Best Places</span>
+      </h2>
+    </div>
+
+    <div class="destinations__grid" id="destinations-grid">
+      <!-- Populated by JS -->
+      <div class="dest-card dest-card--large" id="dest-paris">
+        <div class="card__image-wrapper" style="height:100%">
+          <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80"
+               alt="Paris, France" class="dest-card__image" loading="lazy" />
+          <div class="dest-card__overlay"></div>
+          <div class="dest-card__info">
+            <div class="dest-card__country">🇫🇷 France</div>
+            <div class="dest-card__name">Paris</div>
+          </div>
         </div>
-        
-        <!-- Decorative Image -->
-        <svg class="hero__image" viewBox="0 0 500 500" fill="none">
-            <circle cx="250" cy="250" r="200" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-            <circle cx="250" cy="250" r="150" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
-            <circle cx="250" cy="250" r="100" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-            <path d="M250 50 L260 80 L290 80 L265 100 L275 130 L250 110 L225 130 L235 100 L210 80 L240 80 Z" fill="rgba(255,255,255,0.3)"/>
-            <path d="M350 150 L360 180 L390 180 L365 200 L375 230 L350 210 L325 230 L335 200 L310 180 L340 180 Z" fill="rgba(255,255,255,0.2)"/>
-            <path d="M150 350 L160 380 L190 380 L165 400 L175 430 L150 410 L125 430 L135 400 L110 380 L140 380 Z" fill="rgba(255,255,255,0.2)"/>
-        </svg>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <div class="container">
-            <div class="features__header">
-                <span class="features__label">Features</span>
-                <h2 class="features__title">Everything You Need to Plan</h2>
-                <p class="features__subtitle">
-                    Our comprehensive trip planning tools make it easy to organize every aspect of your journey.
-                </p>
-            </div>
-            
-            <div class="features__grid">
-                <div class="feature-card">
-                    <div class="feature-card__icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                    </div>
-                    <h3 class="feature-card__title">Flexible Dates</h3>
-                    <p class="feature-card__text">
-                        Choose your travel dates with our intuitive date picker. Plan trips of any duration.
-                    </p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-card__icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="2" y1="12" x2="22" y2="12"></line>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="feature-card__title">Multiple Destinations</h3>
-                    <p class="feature-card__text">
-                        Visit multiple countries and cities in one trip. Create the perfect multi-stop itinerary.
-                    </p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-card__icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                        </svg>
-                    </div>
-                    <h3 class="feature-card__title">Hotel Booking</h3>
-                    <p class="feature-card__text">
-                        Browse and book hotels for each destination. Compare prices and amenities easily.
-                    </p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-card__icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                    </div>
-                    <h3 class="feature-card__title">Entertainment</h3>
-                    <p class="feature-card__text">
-                        Pre-book entertainment spots, attractions, and activities at your destinations.
-                    </p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-card__icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                    </div>
-                    <h3 class="feature-card__title">Expense Tracking</h3>
-                    <p class="feature-card__text">
-                        See your total expected expenses in real-time as you plan your trip.
-                    </p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-card__icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                        </svg>
-                    </div>
-                    <h3 class="feature-card__title">Trip Summary</h3>
-                    <p class="feature-card__text">
-                        Get a complete overview of your itinerary with all bookings and costs.
-                    </p>
-                </div>
-            </div>
+      </div>
+      <div class="dest-card" id="dest-tokyo">
+        <div class="card__image-wrapper" style="height:100%">
+          <img src="https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=600&q=80"
+               alt="Tokyo, Japan" class="dest-card__image" loading="lazy" />
+          <div class="dest-card__overlay"></div>
+          <div class="dest-card__info">
+            <div class="dest-card__country">🇯🇵 Japan</div>
+            <div class="dest-card__name">Tokyo</div>
+          </div>
         </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="how-it-works" id="how-it-works">
-        <div class="container">
-            <div class="how-it-works__header">
-                <span class="features__label">Process</span>
-                <h2 class="features__title">How It Works</h2>
-                <p class="features__subtitle">
-                    Plan your perfect trip in just a few simple steps.
-                </p>
-            </div>
-            
-            <div class="how-it-works__steps">
-                <div class="step">
-                    <div class="step__number">1</div>
-                    <h3 class="step__title">Select Dates</h3>
-                    <p class="step__text">Choose your trip start and end dates</p>
-                </div>
-                
-                <div class="step">
-                    <div class="step__number">2</div>
-                    <h3 class="step__title">Pick Countries</h3>
-                    <p class="step__text">Select one or multiple countries to visit</p>
-                </div>
-                
-                <div class="step">
-                    <div class="step__number">3</div>
-                    <h3 class="step__title">Choose Cities</h3>
-                    <p class="step__text">Pick cities and set nights per location</p>
-                </div>
-                
-                <div class="step">
-                    <div class="step__number">4</div>
-                    <h3 class="step__title">Book Hotels</h3>
-                    <p class="step__text">Find and book perfect accommodations</p>
-                </div>
-                
-                <div class="step">
-                    <div class="step__number">5</div>
-                    <h3 class="step__title">Add Activities</h3>
-                    <p class="step__text">Pre-book entertainment and attractions</p>
-                </div>
-                
-                <div class="step">
-                    <div class="step__number">6</div>
-                    <h3 class="step__title">Review & Book</h3>
-                    <p class="step__text">See summary and complete your booking</p>
-                </div>
-            </div>
+      </div>
+      <div class="dest-card" id="dest-santorini">
+        <div class="card__image-wrapper" style="height:100%">
+          <img src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600&q=80"
+               alt="Santorini, Greece" class="dest-card__image" loading="lazy" />
+          <div class="dest-card__overlay"></div>
+          <div class="dest-card__info">
+            <div class="dest-card__country">🇬🇷 Greece</div>
+            <div class="dest-card__name">Santorini</div>
+          </div>
         </div>
-    </section>
-
-    <!-- Destinations Section -->
-    <section class="destinations" id="destinations">
-        <div class="container">
-            <div class="destinations__header">
-                <div>
-                    <span class="features__label">Explore</span>
-                    <h2 class="features__title">Popular Destinations</h2>
-                </div>
-                <a href="pages/select-countries.html" class="btn btn--outline">View All Destinations</a>
-            </div>
-            
-            <div class="destinations__grid">
-                <div class="destination-card">
-                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=320&fit=crop" alt="Paris, France" class="destination-card__image">
-                    <div class="destination-card__overlay">
-                        <h3 class="destination-card__name">Paris, France</h3>
-                        <p class="destination-card__info">The City of Light</p>
-                    </div>
-                </div>
-                
-                <div class="destination-card">
-                    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=320&fit=crop" alt="Tokyo, Japan" class="destination-card__image">
-                    <div class="destination-card__overlay">
-                        <h3 class="destination-card__name">Tokyo, Japan</h3>
-                        <p class="destination-card__info">Where tradition meets future</p>
-                    </div>
-                </div>
-                
-                <div class="destination-card">
-                    <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=320&fit=crop" alt="Rome, Italy" class="destination-card__image">
-                    <div class="destination-card__overlay">
-                        <h3 class="destination-card__name">Rome, Italy</h3>
-                        <p class="destination-card__info">The Eternal City</p>
-                    </div>
-                </div>
-                
-                <div class="destination-card">
-                    <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=320&fit=crop" alt="New York, USA" class="destination-card__image">
-                    <div class="destination-card__overlay">
-                        <h3 class="destination-card__name">New York, USA</h3>
-                        <p class="destination-card__info">The City That Never Sleeps</p>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="dest-card" id="dest-dubai">
+        <div class="card__image-wrapper" style="height:100%">
+          <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80"
+               alt="Dubai, UAE" class="dest-card__image" loading="lazy" />
+          <div class="dest-card__overlay"></div>
+          <div class="dest-card__info">
+            <div class="dest-card__country">🇦🇪 UAE</div>
+            <div class="dest-card__name">Dubai</div>
+          </div>
         </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <h2 class="cta__title">Ready to Start Your Adventure?</h2>
-            <p class="cta__subtitle">
-                Plan your dream trip today and create unforgettable memories.
-            </p>
-            <a href="pages/select-dates.html" class="cta__btn">
-                Start Planning
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-            </a>
+      </div>
+      <div class="dest-card" id="dest-kyoto">
+        <div class="card__image-wrapper" style="height:100%">
+          <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80"
+               alt="Kyoto, Japan" class="dest-card__image" loading="lazy" />
+          <div class="dest-card__overlay"></div>
+          <div class="dest-card__info">
+            <div class="dest-card__country">🇯🇵 Japan</div>
+            <div class="dest-card__name">Kyoto</div>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer__top">
-                <div class="footer__grid">
-                    <div class="footer__col footer__col--brand">
-                        <a href="index.html" class="footer__logo">
-                            <svg class="footer__logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                            </svg>
-                            <span>TripPlanner</span>
-                        </a>
-                        <p class="footer__description">
-                            Plan your perfect trip with ease. Select destinations, book hotels, and discover amazing entertainment spots.
-                        </p>
-                    </div>
-                    
-                    <div class="footer__col">
-                        <h4 class="footer__title">Quick Links</h4>
-                        <ul class="footer__links">
-                            <li><a href="index.html">Home</a></li>
-                            <li><a href="pages/select-countries.html">Destinations</a></li>
-                            <li><a href="pages/select-dates.html">Plan Trip</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer__col">
-                        <h4 class="footer__title">Support</h4>
-                        <ul class="footer__links">
-                            <li><a href="#">FAQ</a></li>
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Contact</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer__bottom">
-                <p class="footer__copyright">
-                    &copy; 2026 TripPlanner. All rights reserved.
-                </p>
-                <p class="footer__credit">
-                    Made with ❤️ for Web Lab Project
-                </p>
-            </div>
-        </div>
-    </footer>
+    <div class="text-center mt-8">
+      <a href="pages/select-countries.html" class="btn btn--outline btn--lg" id="view-all-btn">
+        View All Destinations →
+      </a>
+    </div>
+  </div>
+</section>
 
-    <!-- Scripts -->
-    <script>
-        // Header scroll effect
-        const header = document.getElementById('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('is-scrolled');
-            } else {
-                header.classList.remove('is-scrolled');
-            }
-        });
-        
-        // Mobile menu toggle
-        const menuToggle = document.getElementById('menuToggle');
-        const mobileNav = document.getElementById('mobileNav');
-        
-        menuToggle.addEventListener('click', () => {
-            menuToggle.classList.toggle('is-active');
-            mobileNav.classList.toggle('is-active');
-        });
-        
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                    // Close mobile menu if open
-                    menuToggle.classList.remove('is-active');
-                    mobileNav.classList.remove('is-active');
-                }
-            });
-        });
-    </script>
+<!-- ═══════════════════ CTA SECTION ═══════════════════ -->
+<section class="cta-section" aria-label="Call to action">
+  <div class="container">
+    <div class="cta-box">
+      <div class="section-tag" style="justify-content:center">
+        <span>🚀</span> Ready to Go?
+      </div>
+      <h2 class="section-title">
+        Your Adventure<br>
+        <span class="gradient-text">Awaits You Now</span>
+      </h2>
+      <p class="section-subtitle mx-auto text-center mt-4 mb-8">
+        Start planning your perfect trip today. It's completely free and takes only a few minutes.
+      </p>
+      <a href="pages/select-dates.html" class="btn btn--primary btn--xl" id="cta-start-btn">
+        ✈️ Plan My Trip Now
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="site-footer" id="site-footer">
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <a href="index.html" class="site-logo">
+          <div class="site-logo__icon">✈️</div>
+          <span class="site-logo__text">TripPlanner</span>
+        </a>
+        <p>Your all-in-one travel planning companion. Plan complete trips with dates, cities, hotels, and activities — all in one beautiful app.</p>
+      </div>
+      <div>
+        <h4 class="site-footer__heading">Plan Your Trip</h4>
+        <ul class="site-footer__links">
+          <li><a href="pages/select-dates.html" class="site-footer__link">Select Dates</a></li>
+          <li><a href="pages/select-countries.html" class="site-footer__link">Choose Countries</a></li>
+          <li><a href="pages/select-hotels.html" class="site-footer__link">Book Hotels</a></li>
+          <li><a href="pages/select-entertainment.html" class="site-footer__link">Add Activities</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="site-footer__heading">Destinations</h4>
+        <ul class="site-footer__links">
+          <li><a href="#" class="site-footer__link">France</a></li>
+          <li><a href="#" class="site-footer__link">Japan</a></li>
+          <li><a href="#" class="site-footer__link">Italy</a></li>
+          <li><a href="#" class="site-footer__link">UAE</a></li>
+          <li><a href="#" class="site-footer__link">Greece</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="site-footer__heading">About</h4>
+        <ul class="site-footer__links">
+          <li><a href="#" class="site-footer__link">How It Works</a></li>
+          <li><a href="#" class="site-footer__link">Privacy Policy</a></li>
+          <li><a href="#" class="site-footer__link">Terms of Service</a></li>
+          <li><a href="#" class="site-footer__link">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 TripPlanner</span>
+      
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/app.js"></script>
+<script>
+  // Mobile nav toggle
+  document.getElementById('nav-toggle')?.addEventListener('click', function() {
+    const nav = document.getElementById('site-nav');
+    const expanded = this.getAttribute('aria-expanded') === 'true';
+    this.setAttribute('aria-expanded', !expanded);
+    nav?.classList.toggle('is-open');
+  });
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Intersection Observer for fade-in animations
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.style.opacity = '1'; }),
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll('.feature-card, .step-card, .dest-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
 </body>
 </html>

@@ -1,317 +1,203 @@
 /**
- * Trip Planner ViewModel
- * Main ViewModel that manages the entire trip planning flow
+ * TripPlannerVM – Main ViewModel managing trip state and observer pattern
  */
-class TripPlannerVM {
-    constructor() {
-        // Current trip being planned
-        this.currentTrip = null;
-        
-        // Current step in the planning process
-        this.currentStep = 1;
-        this.totalSteps = 7;
-        
-        // Services
-        this.apiService = null;
-        this.storageService = null;
-        
-        // State
-        this.isLoading = false;
-        this.error = null;
-        
-        // Listeners for state changes (Observer pattern)
-        this.listeners = new Map();
-        
-        // Initialize
-        this._init();
-    }
+import { StorageService } from '../services/StorageService.js';
+import { ApiService } from '../services/ApiService.js';
+import { Trip } from '../models/Trip.js';
 
-    /**
-     * Initialize the ViewModel
-     */
-    async _init() {
-        // Initialize services
-        if (typeof ApiService !== 'undefined') {
-            this.apiService = new ApiService();
-        }
-        if (typeof StorageService !== 'undefined') {
-            this.storageService = new StorageService();
-        }
-        
-        // Try to restore previous trip from storage
-        await this._restoreTrip();
-    }
+export class TripPlannerVM {
+  constructor() {
+    this._observers = new Map();
+    this._trip = this._loadTripFromStorage();
+    this._isLoading = false;
+  }
 
-    /**
-     * Restore trip from local storage
-     */
-    async _restoreTrip() {
-        if (!this.storageService) return;
-        
-        const savedTrip = this.storageService.get('currentTrip');
-        if (savedTrip) {
-            this.currentTrip = Trip.fromJSON(savedTrip);
-            this._notifyListeners('tripRestored', this.currentTrip);
-        }
-    }
+  // ─── Observer pattern ──────────────────────────────────────────────────────
+  subscribe(event, callback) {
+    if (!this._observers.has(event)) this._observers.set(event, []);
+    this._observers.get(event).push(callback);
+    return () => this.unsubscribe(event, callback);
+  }
 
-    /**
-     * Save current trip to storage
-     */
-    _saveTrip() {
-        if (!this.storageService || !this.currentTrip) return;
-        this.storageService.set('currentTrip', this.currentTrip.toJSON());
-    }
+  unsubscribe(event, callback) {
+    const list = this._observers.get(event) || [];
+    this._observers.set(event, list.filter(cb => cb !== callback));
+  }
 
-    /**
-     * Start a new trip
-     */
-    startNewTrip() {
-        this.currentTrip = new Trip();
-        this.currentStep = 1;
-        this._saveTrip();
-        this._notifyListeners('tripStarted', this.currentTrip);
-    }
+  _emit(event, data) {
+    (this._observers.get(event) || []).forEach(cb => cb(data));
+    (this._observers.get('*') || []).forEach(cb => cb({ event, data }));
+  }
 
-    /**
-     * Set trip dates
-     * @param {Date} startDate 
-     * @param {Date} endDate 
-     */
-    setTripDates(startDate, endDate) {
-        if (!this.currentTrip) {
-            this.startNewTrip();
-        }
-        
-        this.currentTrip.startDate = new Date(startDate);
-        this.currentTrip.endDate = new Date(endDate);
-        this._saveTrip();
-        this._notifyListeners('datesSet', { startDate, endDate });
-    }
+  // ─── Getters ───────────────────────────────────────────────────────────────
+  get trip()       { return this._trip; }
+  get isLoading()  { return this._isLoading; }
 
-    /**
-     * Add country to trip
-     * @param {Country} country 
-     * @param {number} visitOrder 
-     * @param {Date} startDate 
-     * @param {Date} endDate 
-     */
-    addCountryToTrip(country, visitOrder, startDate, endDate) {
-        if (!this.currentTrip) return;
-        
-        const tripCountry = new TripCountry({
-            countryId: country.id,
-            countryName: country.name,
-            visitOrder,
-            startDate,
-            endDate
-        });
-        
-        this.currentTrip.addCountry(tripCountry);
-        this._saveTrip();
-        this._notifyListeners('countryAdded', tripCountry);
-    }
+  // ─── Storage ───────────────────────────────────────────────────────────────
+  _loadTripFromStorage() {
+    const state = StorageService.getTripState();
+    return new Trip({
+      startDate:     state.startDate,
+      endDate:       state.endDate,
+      countries:     StorageService.getCountries(),
+      cities:        StorageService.getCities(),
+      hotels:        StorageService.getHotels(),
+      entertainment: StorageService.getEntertainment(),
+    });
+  }
 
-    /**
-     * Remove country from trip
-     * @param {string} countryId 
-     */
-    removeCountryFromTrip(countryId) {
-        if (!this.currentTrip) return;
-        
-        this.currentTrip.countries = this.currentTrip.countries.filter(
-            c => c.countryId !== countryId
-        );
-        
-        // Also remove related cities, hotels, and entertainment
-        const removedCityIds = this.currentTrip.cities
-            .filter(c => c.countryId === countryId)
-            .map(c => c.cityId);
-        
-        this.currentTrip.cities = this.currentTrip.cities.filter(
-            c => c.countryId !== countryId
-        );
-        
-        this.currentTrip.hotels = this.currentTrip.hotels.filter(
-            h => !removedCityIds.includes(h.cityId)
-        );
-        
-        this.currentTrip.entertainment = this.currentTrip.entertainment.filter(
-            e => !removedCityIds.includes(e.cityId)
-        );
-        
-        this.currentTrip.calculateTotalCost();
-        this._saveTrip();
-        this._notifyListeners('countryRemoved', countryId);
-    }
+  _saveTripToStorage() {
+    const t = this._trip;
+    StorageService.setTripState({ startDate: t.startDate, endDate: t.endDate });
+    StorageService.setCountries(t.countries);
+    StorageService.setCities(t.cities);
+    StorageService.setHotels(t.hotels);
+    StorageService.setEntertainment(t.entertainment);
+  }
 
-    /**
-     * Add city to trip
-     * @param {City} city 
-     * @param {number} nightsCount 
-     * @param {Date} startDate 
-     */
-    addCityToTrip(city, nightsCount, startDate) {
-        if (!this.currentTrip) return;
-        
-        const tripCity = new TripCity({
-            cityId: city.id,
-            cityName: city.name,
-            countryId: city.countryId,
-            nightsCount,
-            startDate
-        });
-        
-        this.currentTrip.addCity(tripCity);
-        this._saveTrip();
-        this._notifyListeners('cityAdded', tripCity);
-    }
+  // ─── Step 1: Dates ─────────────────────────────────────────────────────────
+  setDates(startDate, endDate) {
+    this._trip.startDate = startDate;
+    this._trip.endDate   = endDate;
+    StorageService.setDates({ startDate, endDate });
+    StorageService.setTripState({ startDate, endDate });
+    this._emit('datesChanged', { startDate, endDate });
+  }
 
-    /**
-     * Add hotel booking
-     * @param {Hotel} hotel 
-     * @param {Date} checkIn 
-     * @param {Date} checkOut 
-     * @param {number} nights 
-     */
-    addHotelBooking(hotel, checkIn, checkOut, nights) {
-        if (!this.currentTrip) return;
-        
-        const tripHotel = new TripHotel({
-            hotelId: hotel.id,
-            hotelName: hotel.name,
-            cityId: hotel.cityId,
-            checkIn,
-            checkOut,
-            nights,
-            pricePerNight: hotel.pricePerNight
-        });
-        
-        this.currentTrip.addHotel(tripHotel);
-        this._saveTrip();
-        this._notifyListeners('hotelAdded', tripHotel);
-    }
+  getDates() {
+    return { startDate: this._trip.startDate, endDate: this._trip.endDate };
+  }
 
-    /**
-     * Add entertainment booking
-     * @param {Entertainment} entertainment 
-     * @param {Date} visitDate 
-     */
-    addEntertainmentBooking(entertainment, visitDate) {
-        if (!this.currentTrip) return;
-        
-        const tripEntertainment = new TripEntertainment({
-            entertainmentId: entertainment.id,
-            name: entertainment.name,
-            cityId: entertainment.cityId,
-            visitDate,
-            price: entertainment.price
-        });
-        
-        this.currentTrip.addEntertainment(tripEntertainment);
-        this._saveTrip();
-        this._notifyListeners('entertainmentAdded', tripEntertainment);
+  // ─── Step 2: Countries ─────────────────────────────────────────────────────
+  async loadCountries() {
+    this._isLoading = true;
+    this._emit('loadingChanged', true);
+    try {
+      const data = await ApiService.getCountries();
+      this._emit('countriesLoaded', data);
+      return data;
+    } finally {
+      this._isLoading = false;
+      this._emit('loadingChanged', false);
     }
+  }
 
-    /**
-     * Go to next step
-     */
-    nextStep() {
-        if (this.currentStep < this.totalSteps) {
-            this.currentStep++;
-            this._notifyListeners('stepChanged', this.currentStep);
-        }
+  toggleCountry(country) {
+    const idx = this._trip.countries.findIndex(c => c.id === country.id);
+    if (idx >= 0) {
+      this._trip.countries.splice(idx, 1);
+      // Remove cities & hotels for this country
+      this._trip.cities        = this._trip.cities.filter(c => c.countryId !== country.id);
+      this._trip.hotels        = this._trip.hotels.filter(h => {
+        const city = this._trip.cities.find(c => c.id === h.cityId);
+        return city; // keep only hotels whose city still exists
+      });
+    } else {
+      this._trip.countries.push(country);
     }
+    this._saveTripToStorage();
+    this._emit('countriesChanged', this._trip.countries);
+  }
 
-    /**
-     * Go to previous step
-     */
-    previousStep() {
-        if (this.currentStep > 1) {
-            this.currentStep--;
-            this._notifyListeners('stepChanged', this.currentStep);
-        }
-    }
+  isCountrySelected(countryId) {
+    return this._trip.countries.some(c => c.id === countryId);
+  }
 
-    /**
-     * Go to specific step
-     * @param {number} step 
-     */
-    goToStep(step) {
-        if (step >= 1 && step <= this.totalSteps) {
-            this.currentStep = step;
-            this._notifyListeners('stepChanged', this.currentStep);
-        }
-    }
+  // ─── Step 3: Cities ────────────────────────────────────────────────────────
+  async loadCities(countryId) {
+    const data = await ApiService.getCities(countryId);
+    this._emit('citiesLoaded', { countryId, cities: data });
+    return data;
+  }
 
-    /**
-     * Get trip summary
-     * @returns {Object}
-     */
-    getTripSummary() {
-        if (!this.currentTrip) return null;
-        
-        return {
-            duration: this.currentTrip.getDuration(),
-            countriesCount: this.currentTrip.countries.length,
-            citiesCount: this.currentTrip.cities.length,
-            hotelsCount: this.currentTrip.hotels.length,
-            entertainmentCount: this.currentTrip.entertainment.length,
-            totalCost: this.currentTrip.calculateTotalCost(),
-            isValid: this.currentTrip.validate().isValid
-        };
+  toggleCity(city) {
+    const idx = this._trip.cities.findIndex(c => c.id === city.id);
+    if (idx >= 0) {
+      this._trip.cities.splice(idx, 1);
+      this._trip.hotels = this._trip.hotels.filter(h => h.cityId !== city.id);
+    } else {
+      this._trip.cities.push({ ...city, nights: 1 });
     }
+    this._saveTripToStorage();
+    this._emit('citiesChanged', this._trip.cities);
+  }
 
-    /**
-     * Clear current trip
-     */
-    clearTrip() {
-        this.currentTrip = null;
-        this.currentStep = 1;
-        if (this.storageService) {
-            this.storageService.remove('currentTrip');
-        }
-        this._notifyListeners('tripCleared', null);
+  setCityNights(cityId, nights) {
+    const city = this._trip.cities.find(c => c.id === cityId);
+    if (city) {
+      city.nights = Math.max(1, nights);
+      this._saveTripToStorage();
+      this._emit('cityNightsChanged', { cityId, nights: city.nights });
     }
+  }
 
-    /**
-     * Subscribe to state changes
-     * @param {string} event 
-     * @param {Function} callback 
-     */
-    subscribe(event, callback) {
-        if (!this.listeners.has(event)) {
-            this.listeners.set(event, []);
-        }
-        this.listeners.get(event).push(callback);
-    }
+  isCitySelected(cityId) {
+    return this._trip.cities.some(c => c.id === cityId);
+  }
 
-    /**
-     * Unsubscribe from state changes
-     * @param {string} event 
-     * @param {Function} callback 
-     */
-    unsubscribe(event, callback) {
-        if (!this.listeners.has(event)) return;
-        const callbacks = this.listeners.get(event);
-        const index = callbacks.indexOf(callback);
-        if (index > -1) {
-            callbacks.splice(index, 1);
-        }
-    }
+  // ─── Step 4: Hotels ────────────────────────────────────────────────────────
+  async loadHotels(cityId, filters = {}) {
+    const data = await ApiService.getHotels(cityId, filters);
+    this._emit('hotelsLoaded', { cityId, hotels: data });
+    return data;
+  }
 
-    /**
-     * Notify all listeners of an event
-     * @param {string} event 
-     * @param {*} data 
-     */
-    _notifyListeners(event, data) {
-        if (!this.listeners.has(event)) return;
-        this.listeners.get(event).forEach(callback => callback(data));
+  selectHotel(cityId, hotel) {
+    const idx = this._trip.hotels.findIndex(h => h.cityId === cityId);
+    const city = this._trip.cities.find(c => c.id === cityId);
+    const nights = city?.nights || 1;
+    if (idx >= 0) {
+      this._trip.hotels[idx] = { cityId, hotel, nights };
+    } else {
+      this._trip.hotels.push({ cityId, hotel, nights });
     }
+    this._saveTripToStorage();
+    this._emit('hotelsChanged', this._trip.hotels);
+  }
+
+  getHotelForCity(cityId) {
+    return this._trip.hotels.find(h => h.cityId === cityId)?.hotel || null;
+  }
+
+  // ─── Step 5: Entertainment ─────────────────────────────────────────────────
+  async loadEntertainment(cityId, filters = {}) {
+    const data = await ApiService.getEntertainment(cityId, filters);
+    this._emit('entertainmentLoaded', { cityId, entertainment: data });
+    return data;
+  }
+
+  toggleEntertainment(activity) {
+    const idx = this._trip.entertainment.findIndex(e => e.id === activity.id);
+    if (idx >= 0) {
+      this._trip.entertainment.splice(idx, 1);
+    } else {
+      this._trip.entertainment.push(activity);
+    }
+    this._saveTripToStorage();
+    this._emit('entertainmentChanged', this._trip.entertainment);
+  }
+
+  isEntertainmentSelected(activityId) {
+    return this._trip.entertainment.some(e => e.id === activityId);
+  }
+
+  // ─── Cost summary ──────────────────────────────────────────────────────────
+  getCostBreakdown() {
+    return {
+      hotels:         this._trip.hotelsCost,
+      entertainment:  this._trip.entertainmentCost,
+      serviceFee:     this._trip.serviceFee,
+      total:          this._trip.totalCost,
+    };
+  }
+
+  // ─── Reset ─────────────────────────────────────────────────────────────────
+  reset() {
+    StorageService.clear();
+    this._trip = new Trip();
+    this._emit('reset', null);
+  }
 }
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = TripPlannerVM;
-}
+// Singleton instance
+export const tripPlannerVM = new TripPlannerVM();

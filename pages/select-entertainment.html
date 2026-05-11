@@ -1,296 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Entertainment - TripPlanner</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/main.css">
-    
-    <style>
-        .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .page__header { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%); padding: var(--space-8) 0; color: var(--color-white); }
-        .page__title { font-family: var(--font-secondary); font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-2); }
-        .page__subtitle { opacity: 0.9; }
-        .page__content { flex: 1; padding: var(--space-12) 0; background-color: var(--color-gray-50); }
-        
-        /* Stepper */
-        .stepper { display: flex; justify-content: center; padding: var(--space-4) 0; margin-bottom: var(--space-8); flex-wrap: wrap; gap: var(--space-2); }
-        .stepper__step { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
-        .stepper__step-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background-color: var(--color-white); border: 2px solid var(--color-gray-300); border-radius: var(--radius-full); color: var(--color-gray-400); margin-bottom: var(--space-2); }
-        .stepper__step-icon svg { width: 24px; height: 24px; }
-        .stepper__step-label { font-size: var(--text-xs); font-weight: var(--font-medium); color: var(--color-gray-500); }
-        .stepper__step.is-active .stepper__step-icon { background-color: var(--color-primary); border-color: var(--color-primary); color: var(--color-white); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
-        .stepper__step.is-active .stepper__step-label { color: var(--color-primary); font-weight: var(--font-semibold); }
-        .stepper__step.is-completed .stepper__step-icon { background-color: var(--color-success); border-color: var(--color-success); color: var(--color-white); }
-        
-        /* City Section */
-        .city-section { margin-bottom: var(--space-12); }
-        .city-section__header { margin-bottom: var(--space-6); }
-        .city-section__title { font-family: var(--font-secondary); font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-gray-800); }
-        
-        /* Entertainment Grid */
-        .entertainment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-6); }
-        
-        /* Entertainment Card */
-        .entertainment-card { background-color: var(--color-white); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-md); cursor: pointer; transition: all var(--transition-normal); }
-        .entertainment-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl); }
-        .entertainment-card.is-selected { box-shadow: 0 0 0 3px var(--color-primary), var(--shadow-xl); }
-        .entertainment-card__image { width: 100%; height: 160px; object-fit: cover; }
-        .entertainment-card__body { padding: var(--space-5); }
-        .entertainment-card__type { display: inline-block; font-size: var(--text-xs); font-weight: var(--font-semibold); text-transform: uppercase; letter-spacing: 1px; color: var(--color-secondary); margin-bottom: var(--space-2); }
-        .entertainment-card__name { font-family: var(--font-secondary); font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--color-gray-800); margin-bottom: var(--space-2); }
-        .entertainment-card__meta { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--color-gray-500); }
-        .entertainment-card__meta svg { width: 16px; height: 16px; }
-        .entertainment-card__description { font-size: var(--text-sm); color: var(--color-gray-600); margin-bottom: var(--space-4); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .entertainment-card__footer { display: flex; justify-content: space-between; align-items: center; }
-        .entertainment-card__price { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-primary); }
-        .entertainment-card__free { display: inline-block; padding: var(--space-1) var(--space-3); background-color: var(--color-success); color: var(--color-white); font-size: var(--text-sm); font-weight: var(--font-semibold); border-radius: var(--radius-full); }
-        
-        /* Checkbox */
-        .entertainment-card__checkbox { position: absolute; top: var(--space-3); right: var(--space-3); width: 24px; height: 24px; border: 2px solid var(--color-white); border-radius: var(--radius-md); background-color: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: all var(--transition-fast); }
-        .entertainment-card { position: relative; }
-        .entertainment-card:hover .entertainment-card__checkbox { opacity: 1; }
-        .entertainment-card.is-selected .entertainment-card__checkbox { opacity: 1; background-color: var(--color-primary); border-color: var(--color-primary); }
-        .entertainment-card__checkbox svg { width: 14px; height: 14px; color: var(--color-white); opacity: 0; }
-        .entertainment-card.is-selected .entertainment-card__checkbox svg { opacity: 1; }
-        
-        /* Summary */
-        .expense-summary { position: sticky; top: 100px; background-color: var(--color-white); border-radius: var(--radius-xl); padding: var(--space-6); box-shadow: var(--shadow-lg); }
-        .expense-summary__title { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-gray-800); margin-bottom: var(--space-4); }
-        .expense-summary__row { display: flex; justify-content: space-between; padding: var(--space-2) 0; }
-        .expense-summary__label { color: var(--color-gray-600); }
-        .expense-summary__value { font-weight: var(--font-semibold); color: var(--color-gray-800); }
-        .expense-summary__divider { height: 1px; background-color: var(--color-gray-200); margin: var(--space-4) 0; }
-        .expense-summary__total .expense-summary__label { font-weight: var(--font-semibold); font-size: var(--text-lg); color: var(--color-gray-800); }
-        .expense-summary__total .expense-summary__value { font-family: var(--font-secondary); font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-primary); }
-        
-        .page__layout { display: grid; grid-template-columns: 1fr 320px; gap: var(--space-8); align-items: start; }
-        @media (max-width: 1024px) { .page__layout { grid-template-columns: 1fr; } .expense-summary { position: static; } }
-        
-        .page__actions { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-6); background-color: var(--color-white); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); margin-top: var(--space-8); }
-        .page__actions .btn { min-width: 150px; }
-        
-        .skip-note { text-align: center; padding: var(--space-4); background-color: var(--color-gray-100); border-radius: var(--radius-lg); margin-bottom: var(--space-8); color: var(--color-gray-600); }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select Activities — TripPlanner</title>
+  <meta name="description" content="Step 5: Browse and pre-book tours, experiences, and activities." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>" />
+  <link rel="stylesheet" href="../css/main.css" />
 </head>
-<body>
-    <div class="page">
-        <header class="header is-scrolled">
-            <div class="container">
-                <div class="header__inner">
-                    <a href="../index.html" class="header__logo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                        <span class="header__logo-text">TripPlanner</span>
-                    </a>
-                    <a href="../index.html" class="btn btn--outline">Back to Home</a>
-                </div>
-            </div>
-        </header>
+<body class="planner-page">
 
-        <div class="page__header">
-            <div class="container">
-                <h1 class="page__title">Select Entertainment</h1>
-                <p class="page__subtitle">Pre-book activities and attractions (optional)</p>
-            </div>
+<header class="site-header">
+  <div class="container">
+    <div class="site-header__inner">
+      <a href="../index.html" class="site-logo">
+        <div class="site-logo__icon">✈️</div>
+        <span class="site-logo__text">TripPlanner</span>
+      </a>
+      <div class="trip-progress">
+        <span class="text-sm text-secondary">Step 5 of 7</span>
+        <div class="trip-progress__bar">
+          <div class="trip-progress__fill" style="width:71%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="planner-stepper-bar">
+  <div class="container"><div id="stepper"></div></div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="planner-layout">
+      <div class="planner-main">
+        <div class="page-header">
+          <button class="page-header__back" onclick="history.back()">← Back</button>
+          <div class="section-tag"><span>🎭</span> Step 5 (Optional)</div>
+          <h1 class="page-header__title">Add Activities<br><span class="gradient-text">&amp; Experiences</span></h1>
+          <p class="page-header__subtitle">Pre-book tours and activities. You can skip this step.</p>
         </div>
 
-        <main class="page__content">
-            <div class="container">
-                <!-- Stepper -->
-                <div class="stepper">
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Dates</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Countries</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Cities</span></div>
-                    <div class="stepper__step is-completed"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="stepper__step-label">Hotels</span></div>
-                    <div class="stepper__step is-active"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div><span class="stepper__step-label">Activities</span></div>
-                    <div class="stepper__step"><div class="stepper__step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div><span class="stepper__step-label">Checkout</span></div>
-                </div>
+        <!-- Category filter -->
+        <div class="filter-bar mb-6">
+          <button class="filter-chip filter-chip--active" data-cat="all">All</button>
+          <button class="filter-chip" data-cat="Sightseeing">🏛️ Sightseeing</button>
+          <button class="filter-chip" data-cat="Food & Drink">🍜 Food</button>
+          <button class="filter-chip" data-cat="Adventure">🏄 Adventure</button>
+          <button class="filter-chip" data-cat="Art & Culture">🎨 Culture</button>
+          <button class="filter-chip" data-cat="Nature">🌿 Nature</button>
+        </div>
 
-                <div class="skip-note">
-                    This step is optional. You can skip to checkout if you don't want to pre-book any activities.
-                </div>
+        <div id="entertainment-container">
+          <!-- City groups injected by JS -->
+        </div>
+      </div>
 
-                <div class="page__layout">
-                    <div>
-                        <div id="entertainmentContainer"></div>
-                        
-                        <div class="page__actions">
-                            <a href="select-hotels.html" class="btn btn--outline">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                                Back
-                            </a>
-                            <button type="button" class="btn btn--primary" id="continueBtn">
-                                Continue to Summary
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="expense-summary">
-                        <h3 class="expense-summary__title">Trip Summary</h3>
-                        <div class="expense-summary__row">
-                            <span class="expense-summary__label">Hotels</span>
-                            <span class="expense-summary__value" id="totalHotels">$0</span>
-                        </div>
-                        <div class="expense-summary__row">
-                            <span class="expense-summary__label">Activities</span>
-                            <span class="expense-summary__value" id="totalActivities">$0</span>
-                        </div>
-                        <div class="expense-summary__divider"></div>
-                        <div class="expense-summary__row expense-summary__total">
-                            <span class="expense-summary__label">Total</span>
-                            <span class="expense-summary__value" id="grandTotal">$0</span>
-                        </div>
-                    </div>
-                </div>
+      <aside class="planner-sidebar">
+        <div id="expense-sidebar"></div>
+        <div class="card mt-4">
+          <div class="card__body">
+            <h3 class="text-sm font-bold mb-3">🎭 Selected Activities</h3>
+            <div id="activities-summary">
+              <p class="text-sm text-muted">No activities selected.</p>
             </div>
-        </main>
+          </div>
+        </div>
+      </aside>
     </div>
 
-    <script>
-        const entertainmentByCityId = {
-            1: [ // Paris
-                { id: 1, name: 'Eiffel Tower Tour', type: 'Landmark', duration: '2 hours', price: 35, description: 'Skip-the-line access to the iconic Paris landmark.', image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce65f4?w=400&h=200&fit=crop' },
-                { id: 2, name: 'Louvre Museum', type: 'Museum', duration: '3 hours', price: 25, description: 'Explore world-famous art including the Mona Lisa.', image: 'https://images.unsplash.com/photo-1499426600726-ac2c83e6f560?w=400&h=200&fit=crop' },
-                { id: 3, name: 'Seine River Cruise', type: 'Tour', duration: '1 hour', price: 20, description: 'Scenic boat tour along the Seine River.', image: 'https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b?w=400&h=200&fit=crop' }
-            ],
-            3: [ // Tokyo
-                { id: 4, name: 'Senso-ji Temple', type: 'Temple', duration: '2 hours', price: 0, description: 'Tokyo\'s oldest and most famous Buddhist temple.', image: 'https://images.unsplash.com/photo-1583169927774-5e421a9f3fc3?w=400&h=200&fit=crop' },
-                { id: 5, name: 'Tokyo Skytree', type: 'Observation', duration: '2 hours', price: 30, description: '360-degree views of Tokyo from 450m high.', image: 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=400&h=200&fit=crop' }
-            ],
-            5: [ // Rome
-                { id: 6, name: 'Colosseum Tour', type: 'Historic', duration: '3 hours', price: 45, description: 'Guided tour of the ancient Roman amphitheater.', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=200&fit=crop' },
-                { id: 7, name: 'Vatican Museums', type: 'Museum', duration: '4 hours', price: 35, description: 'Sistine Chapel and world-class art collections.', image: 'https://images.unsplash.com/photo-1531572753322-ad063cecc140?w=400&h=200&fit=crop' }
-            ],
-            7: [ // New York
-                { id: 8, name: 'Empire State Building', type: 'Observation', duration: '2 hours', price: 44, description: 'Iconic NYC views from the 86th floor.', image: 'https://images.unsplash.com/photo-1555109307-f7d9da25c244?w=400&h=200&fit=crop' },
-                { id: 9, name: 'Statue of Liberty', type: 'Landmark', duration: '4 hours', price: 24, description: 'Ferry ride and tour of Lady Liberty.', image: 'https://images.unsplash.com/photo-1605130284535-11dd9eedc58a?w=400&h=200&fit=crop' }
-            ]
-        };
-        
-        const defaultEntertainment = [
-            { id: 100, name: 'City Walking Tour', type: 'Tour', duration: '3 hours', price: 25, description: 'Guided tour of the city\'s main attractions.', image: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=400&h=200&fit=crop' },
-            { id: 101, name: 'Local Food Tour', type: 'Food', duration: '4 hours', price: 60, description: 'Sample local cuisine with a knowledgeable guide.', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=200&fit=crop' }
-        ];
-        
-        let selectedEntertainment = []; // Array of entertainment IDs
-        let selectedCities = [];
-        let hotelTotal = 0;
-        
-        const savedCities = localStorage.getItem('tripCities');
-        const savedHotels = localStorage.getItem('tripHotels');
-        
-        if (savedCities) {
-            selectedCities = JSON.parse(savedCities);
+    <div class="step-nav">
+      <button class="btn btn--ghost" onclick="history.back()">← Back</button>
+      <div class="flex gap-3">
+        <button class="btn btn--secondary btn--lg" id="skip-btn">Skip This Step</button>
+        <button class="btn btn--primary btn--lg" id="next-btn">
+          View Trip Summary →
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+
+<script type="module">
+  import { tripPlannerVM } from '../js/viewmodels/TripPlannerVM.js';
+  import { ExpenseCalculatorVM } from '../js/viewmodels/ExpenseCalculatorVM.js';
+  import { renderStepper } from '../js/app.js';
+  import { showToast } from '../js/utils/helpers.js';
+  import { formatCurrency, truncate } from '../js/utils/formatters.js';
+
+  const expenseVM = new ExpenseCalculatorVM();
+  expenseVM.renderSidebar(document.getElementById('expense-sidebar'));
+  renderStepper(5, document.getElementById('stepper'));
+
+  const cities    = tripPlannerVM.trip.cities;
+  const container = document.getElementById('entertainment-container');
+  let activeCategory = 'all';
+  let cityActivitiesMap = {}; // cityId -> activities[]
+
+  if (!cities.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state__icon">🏙️</div>
+        <div class="empty-state__title">No cities selected</div>
+        <a href="select-cities.html" class="btn btn--primary mt-4">← Select Cities</a>
+      </div>`;
+  } else {
+    loadAllActivities();
+  }
+
+  async function loadAllActivities() {
+    for (const city of cities) {
+      const country = tripPlannerVM.trip.countries.find(c => c.id === city.countryId);
+      const section = document.createElement('div');
+      section.className = 'mb-10';
+      section.id = `ent-section-${city.id}`;
+      section.innerHTML = `
+        <div class="flex items-center gap-3 mb-5">
+          <span class="text-2xl">${country?.flag || '🏙️'}</span>
+          <h2 class="text-xl font-bold">${city.name}</h2>
+          <span class="badge badge--primary">${city.nights} nights</span>
+        </div>
+        <div class="card-grid" id="ent-grid-${city.id}">
+          <div class="skeleton" style="height:260px;border-radius:var(--radius-xl)"></div>
+          <div class="skeleton" style="height:260px;border-radius:var(--radius-xl)"></div>
+          <div class="skeleton" style="height:260px;border-radius:var(--radius-xl)"></div>
+        </div>`;
+      container.appendChild(section);
+
+      try {
+        const activities = await tripPlannerVM.loadEntertainment(city.id);
+        cityActivitiesMap[city.id] = activities;
+        renderGrid(activities, city, `ent-grid-${city.id}`);
+      } catch {
+        document.getElementById(`ent-grid-${city.id}`).innerHTML =
+          '<p class="text-secondary">No activities available for this city.</p>';
+      }
+    }
+  }
+
+  function renderGrid(activities, city, gridId) {
+    const grid = document.getElementById(gridId);
+    const filtered = activeCategory === 'all'
+      ? activities
+      : activities.filter(a => a.category === activeCategory);
+
+    if (!filtered.length) {
+      grid.innerHTML = '<p class="text-secondary p-4">No activities in this category.</p>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(act => {
+      const selected = tripPlannerVM.isEntertainmentSelected(act.id);
+      return `
+        <div class="card card--selectable ${selected ? 'card--selected' : ''}"
+             id="act-card-${act.id}" data-act-id="${act.id}" data-city-id="${city.id}"
+             role="button" tabindex="0" aria-pressed="${selected}">
+          <div class="card__image-wrapper">
+            <img src="${act.imageUrl}" alt="${act.name}" class="card__image" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1501901609772-df0848060b33?w=400&q=60'" />
+            <div class="card__badge">${act.emoji} ${act.type}</div>
+            ${selected ? `<div style="position:absolute;top:var(--space-3);left:var(--space-3);width:28px;height:28px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;z-index:2;">✓</div>` : ''}
+          </div>
+          <div class="card__body">
+            <div class="card__tag">${act.category}</div>
+            <h3 class="card__title">${act.name}</h3>
+            <p class="card__text">${truncate(act.description, 80)}</p>
+            <div class="flex gap-4 mt-3">
+              <span class="text-xs text-secondary">⏱️ ${act.duration}</span>
+              <span class="text-xs text-accent font-semibold">⭐ ${act.rating}</span>
+            </div>
+          </div>
+          <div class="card__footer">
+            <div class="card__price">
+              <span class="card__price-label">Per person</span>
+              <span class="card__price-value">${formatCurrency(act.price)}</span>
+            </div>
+            <button class="btn btn--sm ${selected ? 'btn--danger' : 'btn--primary'}" data-toggle-act="${act.id}">
+              ${selected ? '✓ Added' : '+ Add'}
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+
+    grid.querySelectorAll('[data-toggle-act]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const actId = parseInt(btn.dataset.toggleAct);
+        const act   = cityActivitiesMap[city.id]?.find(a => a.id === actId);
+        if (!act) return;
+        tripPlannerVM.toggleEntertainment(act);
+        const isNow = tripPlannerVM.isEntertainmentSelected(actId);
+        showToast(
+          isNow ? `${act.name} added!` : `${act.name} removed.`,
+          isNow ? 'success' : 'warning'
+        );
+        renderGrid(cityActivitiesMap[city.id], city, gridId);
+        updateActivitiesSummary();
+        expenseVM.recalculate();
+        expenseVM.renderSidebar(document.getElementById('expense-sidebar'));
+      });
+    });
+  }
+
+  function updateActivitiesSummary() {
+    const acts  = tripPlannerVM.trip.entertainment;
+    const sumEl = document.getElementById('activities-summary');
+    if (!acts.length) {
+      sumEl.innerHTML = '<p class="text-sm text-muted">No activities selected.</p>';
+      return;
+    }
+    const total = acts.reduce((s, a) => s + a.price, 0);
+    sumEl.innerHTML = acts.map(a => `
+      <div class="flex justify-between items-center py-2 border-b" style="border-color:var(--border-color)">
+        <span class="text-sm">${a.emoji} ${a.name.length > 20 ? a.name.slice(0,20) + '…' : a.name}</span>
+        <span class="text-sm font-semibold">${formatCurrency(a.price)}</span>
+      </div>`).join('') +
+      `<div class="flex justify-between py-2 font-bold text-sm">
+        <span>Total</span><span class="gradient-text">${formatCurrency(total)}</span>
+      </div>`;
+  }
+
+  // Category filter
+  document.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('filter-chip--active'));
+      btn.classList.add('filter-chip--active');
+      activeCategory = btn.dataset.cat;
+      // Re-render all grids
+      cities.forEach(city => {
+        if (cityActivitiesMap[city.id]) {
+          renderGrid(cityActivitiesMap[city.id], city, `ent-grid-${city.id}`);
         }
-        if (savedHotels) {
-            const hotels = JSON.parse(savedHotels);
-            hotelTotal = hotels.reduce((sum, h) => sum + h.total, 0);
-        }
-        
-        const entertainmentContainer = document.getElementById('entertainmentContainer');
-        const continueBtn = document.getElementById('continueBtn');
-        
-        function renderEntertainment() {
-            entertainmentContainer.innerHTML = selectedCities.map(city => {
-                let entertainment = entertainmentByCityId[city.id] || defaultEntertainment.map((e, i) => ({ ...e, id: city.id * 1000 + i }));
-                return `
-                    <div class="city-section">
-                        <div class="city-section__header">
-                            <h2 class="city-section__title">${city.name}</h2>
-                        </div>
-                        <div class="entertainment-grid">
-                            ${entertainment.map(item => `
-                                <div class="entertainment-card ${selectedEntertainment.includes(item.id) ? 'is-selected' : ''}" 
-                                     data-id="${item.id}" data-price="${item.price}" data-name="${item.name}">
-                                    <img src="${item.image}" alt="${item.name}" class="entertainment-card__image">
-                                    <div class="entertainment-card__body">
-                                        <span class="entertainment-card__type">${item.type}</span>
-                                        <h3 class="entertainment-card__name">${item.name}</h3>
-                                        <div class="entertainment-card__meta">
-                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${item.duration}</span>
-                                        </div>
-                                        <p class="entertainment-card__description">${item.description}</p>
-                                        <div class="entertainment-card__footer">
-                                            ${item.price > 0 ? `<span class="entertainment-card__price">$${item.price}</span>` : '<span class="entertainment-card__free">Free</span>'}
-                                            <button class="btn btn--primary btn--sm">${selectedEntertainment.includes(item.id) ? 'Remove' : 'Add'}</button>
-                                        </div>
-                                    </div>
-                                    <div class="entertainment-card__checkbox">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            document.querySelectorAll('.entertainment-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const id = parseInt(card.dataset.id);
-                    toggleEntertainment(id);
-                });
-            });
-        }
-        
-        function toggleEntertainment(id) {
-            const index = selectedEntertainment.indexOf(id);
-            if (index > -1) {
-                selectedEntertainment.splice(index, 1);
-            } else {
-                selectedEntertainment.push(id);
-            }
-            updateUI();
-        }
-        
-        function updateUI() {
-            document.querySelectorAll('.entertainment-card').forEach(card => {
-                const id = parseInt(card.dataset.id);
-                const isSelected = selectedEntertainment.includes(id);
-                card.classList.toggle('is-selected', isSelected);
-                card.querySelector('.btn').textContent = isSelected ? 'Remove' : 'Add';
-            });
-            
-            let activityTotal = 0;
-            selectedEntertainment.forEach(id => {
-                const card = document.querySelector(`.entertainment-card[data-id="${id}"]`);
-                if (card) {
-                    activityTotal += parseInt(card.dataset.price) || 0;
-                }
-            });
-            
-            document.getElementById('totalHotels').textContent = `$${hotelTotal}`;
-            document.getElementById('totalActivities').textContent = `$${activityTotal}`;
-            document.getElementById('grandTotal').textContent = `$${hotelTotal + activityTotal}`;
-        }
-        
-        continueBtn.addEventListener('click', () => {
-            const entertainmentData = selectedEntertainment.map(id => {
-                const card = document.querySelector(`.entertainment-card[data-id="${id}"]`);
-                return {
-                    id: id,
-                    name: card.dataset.name,
-                    price: parseInt(card.dataset.price) || 0
-                };
-            });
-            localStorage.setItem('tripEntertainment', JSON.stringify(entertainmentData));
-            window.location.href = 'trip-summary.html';
-        });
-        
-        // Load saved entertainment
-        const savedEntertainment = localStorage.getItem('tripEntertainment');
-        if (savedEntertainment) {
-            const entertainment = JSON.parse(savedEntertainment);
-            selectedEntertainment = entertainment.map(e => e.id);
-        }
-        
-        renderEntertainment();
-        updateUI();
-    </script>
+      });
+    });
+  });
+
+  document.getElementById('skip-btn').addEventListener('click', () => { window.location.href = 'trip-summary.html'; });
+  document.getElementById('next-btn').addEventListener('click', () => { window.location.href = 'trip-summary.html'; });
+</script>
 </body>
 </html>

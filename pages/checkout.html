@@ -1,318 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - TripPlanner</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/main.css">
-    
-    <style>
-        .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .page__header { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-600) 100%); padding: var(--space-8) 0; color: var(--color-white); }
-        .page__title { font-family: var(--font-secondary); font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-2); }
-        .page__subtitle { opacity: 0.9; }
-        .page__content { flex: 1; padding: var(--space-12) 0; background-color: var(--color-gray-50); }
-        
-        /* Layout */
-        .page__layout { display: grid; grid-template-columns: 1fr 400px; gap: var(--space-8); align-items: start; }
-        @media (max-width: 1024px) { .page__layout { grid-template-columns: 1fr; } }
-        
-        /* Form Card */
-        .form-card { background-color: var(--color-white); border-radius: var(--radius-xl); padding: var(--space-8); box-shadow: var(--shadow-lg); margin-bottom: var(--space-8); }
-        .form-card__header { margin-bottom: var(--space-6); padding-bottom: var(--space-6); border-bottom: 1px solid var(--color-gray-200); }
-        .form-card__title { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-gray-800); }
-        
-        /* Form Grid */
-        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
-        .form-grid--full { grid-template-columns: 1fr; }
-        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
-        
-        /* Form Group */
-        .form-group { margin-bottom: var(--space-4); }
-        .form-label { display: block; font-weight: var(--font-medium); color: var(--color-gray-700); margin-bottom: var(--space-2); }
-        .form-input { width: 100%; padding: var(--space-3) var(--space-4); border: 2px solid var(--color-gray-200); border-radius: var(--radius-lg); font-size: var(--text-base); transition: all var(--transition-fast); }
-        .form-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        
-        /* Order Summary */
-        .order-summary { background-color: var(--color-white); border-radius: var(--radius-xl); padding: var(--space-8); box-shadow: var(--shadow-lg); position: sticky; top: 100px; }
-        .order-summary__title { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-gray-800); margin-bottom: var(--space-6); }
-        .order-summary__items { margin-bottom: var(--space-6); }
-        .order-summary__item { display: flex; justify-content: space-between; padding: var(--space-2) 0; font-size: var(--text-sm); }
-        .order-summary__item-name { color: var(--color-gray-600); }
-        .order-summary__item-price { font-weight: var(--font-semibold); color: var(--color-gray-800); }
-        .order-summary__divider { height: 1px; background-color: var(--color-gray-200); margin: var(--space-4) 0; }
-        .order-summary__total { display: flex; justify-content: space-between; padding: var(--space-4) 0; }
-        .order-summary__total-label { font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--color-gray-800); }
-        .order-summary__total-price { font-family: var(--font-secondary); font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-primary); }
-        
-        /* Payment Methods */
-        .payment-methods { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-6); }
-        .payment-method { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border: 2px solid var(--color-gray-200); border-radius: var(--radius-lg); cursor: pointer; transition: all var(--transition-fast); }
-        .payment-method:hover { border-color: var(--color-primary-300); }
-        .payment-method.is-selected { border-color: var(--color-primary); background-color: var(--color-primary-50); }
-        .payment-method__radio { width: 20px; height: 20px; border: 2px solid var(--color-gray-300); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .payment-method.is-selected .payment-method__radio { border-color: var(--color-primary); }
-        .payment-method.is-selected .payment-method__radio::after { content: ''; width: 10px; height: 10px; background-color: var(--color-primary); border-radius: 50%; }
-        .payment-method__icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: var(--color-gray-100); border-radius: var(--radius-md); }
-        .payment-method__icon svg { width: 24px; height: 24px; color: var(--color-gray-600); }
-        .payment-method__name { font-weight: var(--font-medium); color: var(--color-gray-800); }
-        
-        /* Card Form */
-        .card-form { display: none; }
-        .card-form.is-visible { display: block; }
-        
-        /* Success Modal */
-        .success-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .success-modal.is-visible { display: flex; }
-        .success-modal__content { background-color: var(--color-white); border-radius: var(--radius-2xl); padding: var(--space-12); text-align: center; max-width: 480px; margin: var(--space-4); }
-        .success-modal__icon { width: 80px; height: 80px; background-color: var(--color-success); color: var(--color-white); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-6); }
-        .success-modal__icon svg { width: 40px; height: 40px; }
-        .success-modal__title { font-family: var(--font-secondary); font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-gray-800); margin-bottom: var(--space-4); }
-        .success-modal__text { color: var(--color-gray-600); margin-bottom: var(--space-8); }
-        .success-modal__booking { background-color: var(--color-gray-100); padding: var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-6); }
-        .success-modal__booking-label { font-size: var(--text-sm); color: var(--color-gray-500); }
-        .success-modal__booking-id { font-family: var(--font-secondary); font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-primary); }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — TripPlanner</title>
+  <meta name="description" content="Step 7: Enter your contact information and select a payment method to complete your booking." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>" />
+  <link rel="stylesheet" href="../css/main.css" />
 </head>
-<body>
-    <div class="page">
-        <header class="header is-scrolled">
-            <div class="container">
-                <div class="header__inner">
-                    <a href="../index.html" class="header__logo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                        <span class="header__logo-text">TripPlanner</span>
-                    </a>
-                    <a href="../index.html" class="btn btn--outline">Back to Home</a>
-                </div>
-            </div>
-        </header>
+<body class="planner-page">
 
-        <div class="page__header">
-            <div class="container">
-                <h1 class="page__title">Checkout</h1>
-                <p class="page__subtitle">Complete your booking</p>
-            </div>
+<header class="site-header">
+  <div class="container">
+    <div class="site-header__inner">
+      <a href="../index.html" class="site-logo">
+        <div class="site-logo__icon">✈️</div>
+        <span class="site-logo__text">TripPlanner</span>
+      </a>
+      <div class="trip-progress">
+        <span class="text-sm text-secondary">Step 7 of 7</span>
+        <div class="trip-progress__bar">
+          <div class="trip-progress__fill" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="planner-stepper-bar">
+  <div class="container"><div id="stepper"></div></div>
+</div>
+
+<!-- Confirmation overlay (hidden initially) -->
+<div id="confirmation-overlay" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; padding:var(--space-6);">
+  <div class="card" style="max-width:520px;width:100%">
+    <div class="card__body text-center py-12 px-8">
+      <div class="confirmation-icon" id="confirmation-icon">🎉</div>
+      <h1 class="section-title mt-6 mb-4">Booking Confirmed!</h1>
+      <p class="text-secondary mb-4">Your trip has been successfully booked. Check your email for confirmation details.</p>
+      <div class="glass rounded-xl p-4 mb-6">
+        <div class="text-xs text-muted mb-1">Booking Reference</div>
+        <div class="text-2xl font-bold gradient-text" id="booking-ref">TP-XXXXXXXX</div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <a href="../index.html" class="btn btn--primary btn--block btn--lg" id="plan-another-btn" onclick="clearTrip()">
+          ✈️ Plan Another Trip
+        </a>
+        <button class="btn btn--secondary btn--block" onclick="window.print()">
+          🖨️ Print Confirmation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="planner-layout">
+      <div class="planner-main">
+        <div class="page-header">
+          <button class="page-header__back" onclick="history.back()">← Back</button>
+          <div class="section-tag"><span>💳</span> Step 7</div>
+          <h1 class="page-header__title">Complete Your<br><span class="gradient-text">Booking</span></h1>
+          <p class="page-header__subtitle">Enter your details to confirm your trip.</p>
         </div>
 
-        <main class="page__content">
-            <div class="container">
-                <div class="page__layout">
-                    <div>
-                        <!-- Contact Information -->
-                        <div class="form-card">
-                            <div class="form-card__header">
-                                <h2 class="form-card__title">Contact Information</h2>
-                            </div>
-                            <form id="checkoutForm">
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label class="form-label" for="firstName">First Name</label>
-                                        <input type="text" id="firstName" class="form-input" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="lastName">Last Name</label>
-                                        <input type="text" id="lastName" class="form-input" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="email">Email Address</label>
-                                    <input type="email" id="email" class="form-input" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="phone">Phone Number</label>
-                                    <input type="tel" id="phone" class="form-input" required>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <!-- Payment Method -->
-                        <div class="form-card">
-                            <div class="form-card__header">
-                                <h2 class="form-card__title">Payment Method</h2>
-                            </div>
-                            
-                            <div class="payment-methods">
-                                <div class="payment-method is-selected" data-method="card">
-                                    <div class="payment-method__radio"></div>
-                                    <div class="payment-method__icon">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                                    </div>
-                                    <span class="payment-method__name">Credit / Debit Card</span>
-                                </div>
-                                <div class="payment-method" data-method="paypal">
-                                    <div class="payment-method__radio"></div>
-                                    <div class="payment-method__icon">
-                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.144 19.532l1.049-5.751c.11-.606.691-1.002 1.304-1.002h2.384c2.678 0 4.838-1.3 5.559-3.89.29-1.04.325-1.974.12-2.8-.17-.69-.508-1.284-1.007-1.779l-.013-.012C15.607 3.3 14.27 2.75 12.3 2.75H5.854c-.66 0-1.226.48-1.33 1.125L3.013 14.3c-.067.412.25.785.673.785h2.812z"/></svg>
-                                    </div>
-                                    <span class="payment-method__name">PayPal</span>
-                                </div>
-                            </div>
-                            
-                            <div class="card-form is-visible" id="cardForm">
-                                <div class="form-group">
-                                    <label class="form-label" for="cardNumber">Card Number</label>
-                                    <input type="text" id="cardNumber" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19">
-                                </div>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label class="form-label" for="expiry">Expiry Date</label>
-                                        <input type="text" id="expiry" class="form-input" placeholder="MM/YY" maxlength="5">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="cvv">CVV</label>
-                                        <input type="text" id="cvv" class="form-input" placeholder="123" maxlength="4">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="cardName">Name on Card</label>
-                                    <input type="text" id="cardName" class="form-input" placeholder="John Doe">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="page__actions">
-                            <a href="trip-summary.html" class="btn btn--outline">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                                Back
-                            </a>
-                            <button type="button" class="btn btn--primary" id="placeOrderBtn">
-                                Complete Booking
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Order Summary -->
-                    <div class="order-summary">
-                        <h3 class="order-summary__title">Order Summary</h3>
-                        <div class="order-summary__items" id="orderItems"></div>
-                        <div class="order-summary__divider"></div>
-                        <div class="order-summary__total">
-                            <span class="order-summary__total-label">Total</span>
-                            <span class="order-summary__total-price" id="orderTotal">$0</span>
-                        </div>
-                    </div>
-                </div>
+        <!-- Contact Information -->
+        <div class="card mb-6">
+          <div class="card__body">
+            <h2 class="text-lg font-bold mb-5 flex items-center gap-2">👤 Contact Information</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-5)">
+              <div class="form-group" style="grid-column:span 2">
+                <label class="form-label form-label--required" for="full-name">Full Name</label>
+                <input type="text" id="full-name" class="form-input" placeholder="John Smith" autocomplete="name" />
+                <span class="form-error" id="name-error" style="display:none">⚠️ Full name is required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="email">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="john@example.com" autocomplete="email" />
+                <span class="form-error" id="email-error" style="display:none">⚠️ Valid email required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="phone">Phone Number</label>
+                <input type="tel" id="phone" class="form-input" placeholder="+1 234 567 8900" autocomplete="tel" />
+                <span class="form-error" id="phone-error" style="display:none">⚠️ Phone number required</span>
+              </div>
+              <div class="form-group" style="grid-column:span 2">
+                <label class="form-label" for="special-requests">Special Requests (Optional)</label>
+                <textarea id="special-requests" class="form-textarea" placeholder="Dietary requirements, accessibility needs, room preferences..."></textarea>
+              </div>
             </div>
-        </main>
-    </div>
-    
-    <!-- Success Modal -->
-    <div class="success-modal" id="successModal">
-        <div class="success-modal__content">
-            <div class="success-modal__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <h2 class="success-modal__title">Booking Confirmed!</h2>
-            <p class="success-modal__text">Your trip has been booked successfully. We've sent a confirmation email to your inbox.</p>
-            <div class="success-modal__booking">
-                <div class="success-modal__booking-label">Booking ID</div>
-                <div class="success-modal__booking-id" id="bookingId">TP-000000</div>
-            </div>
-            <a href="../index.html" class="btn btn--primary btn--block">Back to Home</a>
+          </div>
         </div>
+
+        <!-- Payment Method -->
+        <div class="card mb-6">
+          <div class="card__body">
+            <h2 class="text-lg font-bold mb-5 flex items-center gap-2">💳 Payment Method</h2>
+            <div id="payment-options" style="display:flex; flex-direction:column; gap:var(--space-3)">
+              <!-- Injected by JS -->
+            </div>
+            <span class="form-error mt-3" id="payment-error" style="display:none">⚠️ Please select a payment method</span>
+
+            <!-- Security badges -->
+            <div class="flex items-center gap-4 mt-5 p-4 glass rounded-xl">
+              <span class="text-sm text-secondary flex items-center gap-2">🔒 SSL Secured</span>
+              <span class="text-sm text-secondary flex items-center gap-2">🛡️ 256-bit Encryption</span>
+              <span class="text-sm text-secondary flex items-center gap-2">✅ PCI Compliant</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="card mb-6">
+          <div class="card__body">
+            <label class="form-checkbox">
+              <input type="checkbox" id="terms-check" />
+              <span class="text-sm text-secondary">
+                I agree to the <a href="#" class="text-accent" style="text-decoration:underline">Terms & Conditions</a>
+                and <a href="#" class="text-accent" style="text-decoration:underline">Privacy Policy</a>.
+                I understand that hotel bookings are subject to availability.
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order summary sidebar -->
+      <aside class="planner-sidebar">
+        <div class="expense-sidebar">
+          <div class="expense-sidebar__header">
+            <div class="expense-sidebar__title">🧾 Order Summary</div>
+          </div>
+          <div class="expense-sidebar__body" id="order-summary-body">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="expense-total">
+            <span class="expense-total__label">Total to Pay</span>
+            <span class="expense-total__amount" id="order-total">$0</span>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card__body text-center">
+            <div class="text-3xl mb-2">🔒</div>
+            <p class="text-xs text-muted">
+              Your payment is protected. You won't be charged until we confirm your booking.
+            </p>
+          </div>
+        </div>
+      </aside>
     </div>
 
-    <script>
-        // Load totals
-        const totals = JSON.parse(localStorage.getItem('tripTotal') || '{}');
-        const hotels = JSON.parse(localStorage.getItem('tripHotels') || '[]');
-        const entertainment = JSON.parse(localStorage.getItem('tripEntertainment') || '[]');
-        
-        // Render order items
-        let orderItemsHtml = '';
-        
-        hotels.forEach(hotel => {
-            orderItemsHtml += `
-                <div class="order-summary__item">
-                    <span class="order-summary__item-name">${hotel.hotelName} (${hotel.nights} nights)</span>
-                    <span class="order-summary__item-price">$${hotel.total}</span>
-                </div>
-            `;
-        });
-        
-        entertainment.forEach(item => {
-            orderItemsHtml += `
-                <div class="order-summary__item">
-                    <span class="order-summary__item-name">${item.name}</span>
-                    <span class="order-summary__item-price">${item.price > 0 ? '$' + item.price : 'Free'}</span>
-                </div>
-            `;
-        });
-        
-        orderItemsHtml += `
-            <div class="order-summary__item" style="color: var(--color-gray-400);">
-                <span class="order-summary__item-name">Service Fee</span>
-                <span class="order-summary__item-price">$${totals.serviceFee || 0}</span>
-            </div>
-        `;
-        
-        document.getElementById('orderItems').innerHTML = orderItemsHtml;
-        document.getElementById('orderTotal').textContent = `$${totals.total || 0}`;
-        
-        // Payment method selection
-        document.querySelectorAll('.payment-method').forEach(method => {
-            method.addEventListener('click', () => {
-                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('is-selected'));
-                method.classList.add('is-selected');
-                
-                const cardForm = document.getElementById('cardForm');
-                if (method.dataset.method === 'card') {
-                    cardForm.classList.add('is-visible');
-                } else {
-                    cardForm.classList.remove('is-visible');
-                }
-            });
-        });
-        
-        // Card number formatting
-        document.getElementById('cardNumber').addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-            e.target.value = value;
-        });
-        
-        // Expiry formatting
-        document.getElementById('expiry').addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2);
-            }
-            e.target.value = value;
-        });
-        
-        // Place order
-        document.getElementById('placeOrderBtn').addEventListener('click', () => {
-            const form = document.getElementById('checkoutForm');
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            
-            if (!firstName || !lastName || !email) {
-                alert('Please fill in all contact information fields.');
-                return;
-            }
-            
-            // Generate booking ID
-            const bookingId = 'TP-' + Date.now().toString().slice(-6);
-            document.getElementById('bookingId').textContent = bookingId;
-            
-            // Show success modal
-            document.getElementById('successModal').classList.add('is-visible');
-            
-            // Clear trip data
-            localStorage.removeItem('tripDates');
-            localStorage.removeItem('tripCountries');
-            localStorage.removeItem('tripCities');
-            localStorage.removeItem('tripHotels');
-            localStorage.removeItem('tripEntertainment');
-            localStorage.removeItem('tripTotal');
-        });
-    </script>
+    <div class="step-nav">
+      <button class="btn btn--ghost" onclick="history.back()">← Back to Summary</button>
+      <button class="btn btn--primary btn--xl" id="confirm-btn">
+        🎉 Confirm My Booking
+      </button>
+    </div>
+  </div>
+</main>
+
+<div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+
+<script type="module">
+  import { tripPlannerVM } from '../js/viewmodels/TripPlannerVM.js';
+  import { renderStepper } from '../js/app.js';
+  import { ValidationService } from '../js/services/ValidationService.js';
+  import { formatCurrency } from '../js/utils/formatters.js';
+  import { showToast } from '../js/utils/helpers.js';
+  import { PAYMENT_METHODS } from '../js/utils/constants.js';
+
+  renderStepper(7, document.getElementById('stepper'));
+
+  const trip = tripPlannerVM.trip;
+
+  // Render payment options
+  const paymentContainer = document.getElementById('payment-options');
+  paymentContainer.innerHTML = PAYMENT_METHODS.map(m => `
+    <div class="payment-option" data-payment="${m.id}" role="radio" tabindex="0" aria-checked="false" id="pay-${m.id}">
+      <div class="payment-option__icon">${m.icon}</div>
+      <div>
+        <div class="payment-option__label">${m.label}</div>
+        <div class="payment-option__desc">${m.desc}</div>
+      </div>
+      <div style="margin-left:auto">
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color-hover);transition:all var(--transition-fast)" id="radio-${m.id}"></div>
+      </div>
+    </div>`).join('');
+
+  let selectedPayment = null;
+
+  paymentContainer.querySelectorAll('.payment-option').forEach(opt => {
+    const select = () => {
+      paymentContainer.querySelectorAll('.payment-option').forEach(o => {
+        o.classList.remove('payment-option--selected');
+        o.setAttribute('aria-checked', 'false');
+        document.getElementById(`radio-${o.dataset.payment}`).style.background = '';
+        document.getElementById(`radio-${o.dataset.payment}`).style.borderColor = 'var(--border-color-hover)';
+      });
+      opt.classList.add('payment-option--selected');
+      opt.setAttribute('aria-checked', 'true');
+      selectedPayment = opt.dataset.payment;
+      const radio = document.getElementById(`radio-${selectedPayment}`);
+      radio.style.background = 'linear-gradient(135deg, #6366f1, #ec4899)';
+      radio.style.borderColor = 'var(--color-primary)';
+      document.getElementById('payment-error').style.display = 'none';
+    };
+    opt.addEventListener('click', select);
+    opt.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(); } });
+  });
+
+  // Render order summary
+  const { hotelsCost, entertainmentCost, serviceFee, total } = tripPlannerVM.getCostBreakdown();
+  document.getElementById('order-summary-body').innerHTML = `
+    <div class="expense-row">
+      <span class="expense-row__label">🏨 Hotels (${trip.hotels.length})</span>
+      <span class="expense-row__value">${formatCurrency(hotelsCost)}</span>
+    </div>
+    <div class="expense-row">
+      <span class="expense-row__label">🎭 Activities (${trip.entertainment.length})</span>
+      <span class="expense-row__value">${formatCurrency(entertainmentCost)}</span>
+    </div>
+    <div class="expense-row">
+      <span class="expense-row__label">🔧 Service Fee (5%)</span>
+      <span class="expense-row__value">${formatCurrency(serviceFee)}</span>
+    </div>`;
+  document.getElementById('order-total').textContent = formatCurrency(total);
+
+  // Confirm booking
+  document.getElementById('confirm-btn').addEventListener('click', () => {
+    const name    = document.getElementById('full-name').value;
+    const email   = document.getElementById('email').value;
+    const phone   = document.getElementById('phone').value;
+    const terms   = document.getElementById('terms-check').checked;
+    let valid = true;
+
+    // Reset errors
+    ['name-error','email-error','phone-error','payment-error'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+
+    if (!name.trim())                    { document.getElementById('name-error').style.display = 'flex'; valid = false; }
+    if (!email.trim() || !ValidationService.isValidEmail(email)) { document.getElementById('email-error').style.display = 'flex'; valid = false; }
+    if (!phone.trim())                   { document.getElementById('phone-error').style.display = 'flex'; valid = false; }
+    if (!selectedPayment)                { document.getElementById('payment-error').style.display = 'flex'; valid = false; }
+    if (!terms)                          { showToast('Please accept the terms and conditions.', 'warning'); valid = false; }
+
+    if (!valid) { showToast('Please fill in all required fields.', 'error', 'Form Incomplete'); return; }
+
+    // Build payload from trip state
+    const btn = document.getElementById('confirm-btn');
+    btn.classList.add('btn--loading');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    const { hotelsCost, entertainmentCost, serviceFee, total } = tripPlannerVM.getCostBreakdown();
+
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName  = nameParts.slice(1).join(' ') || '';
+
+    const payload = {
+      first_name:         firstName,
+      last_name:          lastName,
+      email:              email.trim(),
+      phone:              phone.trim(),
+      payment_method:     selectedPayment,
+      start_date:         trip.startDate  || '',
+      end_date:           trip.endDate    || '',
+      countries_json:     trip.countries,
+      cities_json:        trip.cities.map(c => ({ id: c.id, name: c.name, nights: c.nights })),
+      hotels_json:        trip.hotels,
+      entertainment_json: trip.entertainment,
+      subtotal:           hotelsCost + entertainmentCost,
+      service_fee:        serviceFee,
+      total_cost:         total,
+    };
+
+    fetch('/trip/php/api/trips.php', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    })
+    .then(res => res.json())
+    .then(json => {
+      btn.classList.remove('btn--loading');
+      btn.disabled = false;
+      btn.textContent = '🎉 Confirm My Booking';
+
+      if (!json.success) {
+        showToast(json.message || 'Booking failed. Please try again.', 'error', 'Error');
+        return;
+      }
+
+      // Show confirmation overlay with real booking code
+      document.getElementById('booking-ref').textContent = json.data.booking_code;
+      const overlay = document.getElementById('confirmation-overlay');
+      overlay.style.display = 'flex';
+      tripPlannerVM.reset();
+    })
+    .catch(() => {
+      btn.classList.remove('btn--loading');
+      btn.disabled = false;
+      btn.textContent = '🎉 Confirm My Booking';
+      showToast('Network error. Please check your connection.', 'error', 'Connection Failed');
+    });
+  });
+
+  // Expose clearTrip globally for the "Plan Another" button
+  window.clearTrip = () => { tripPlannerVM.reset(); };
+</script>
 </body>
 </html>

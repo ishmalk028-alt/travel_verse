@@ -1,217 +1,76 @@
 /**
- * API Service
- * Handles all API communications with the backend
+ * ApiService – handles HTTP requests to PHP API and falls back to local JSON data
  */
-class ApiService {
-    constructor(baseUrl = '') {
-        this.baseUrl = baseUrl || this._getBaseUrl();
-        this.defaultHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        };
+export class ApiService {
+  static BASE_URL = '/trip/php/api';
+  static DATA_URL = '/trip/data';
+
+  /**
+   * Generic fetch with error handling and PHP/JSON fallback.
+   * If PHP is unavailable (no server), falls back to local JSON files.
+   */
+  static async fetch(endpoint, params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const url = `${ApiService.BASE_URL}/${endpoint}${queryString ? '?' + queryString : ''}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json.success) return json.data;
+      throw new Error(json.message || 'API error');
+    } catch {
+      // Fallback to local JSON
+      return ApiService.fetchLocal(endpoint, params);
+    }
+  }
+
+  static async fetchLocal(endpoint, params = {}) {
+    // Map endpoint to data file
+    const fileMap = {
+      'countries.php':     'countries.json',
+      'cities.php':        'cities.json',
+      'hotels.php':        'hotels.json',
+      'entertainment.php': 'entertainment.json',
+    };
+    const file = fileMap[endpoint];
+    if (!file) throw new Error(`No local data for ${endpoint}`);
+
+    const res = await fetch(`${ApiService.DATA_URL}/${file}`);
+    if (!res.ok) throw new Error(`Failed to load ${file}`);
+    let data = await res.json();
+
+    // Apply filters from params
+    if (params.countryId) {
+      data = data.filter(d => d.countryId === parseInt(params.countryId));
+    }
+    if (params.cityId) {
+      data = data.filter(d => d.cityId === parseInt(params.cityId));
+    }
+    if (params.minPrice) {
+      data = data.filter(d => (d.pricePerNight || d.price || 0) >= parseInt(params.minPrice));
+    }
+    if (params.maxPrice) {
+      data = data.filter(d => (d.pricePerNight || d.price || 0) <= parseInt(params.maxPrice));
+    }
+    if (params.stars) {
+      data = data.filter(d => d.starRating === parseInt(params.stars));
+    }
+    if (params.type) {
+      data = data.filter(d => d.type === params.type);
+    }
+    if (params.sortBy) {
+      if (params.sortBy === 'price_asc')  data.sort((a, b) => (a.pricePerNight || a.price) - (b.pricePerNight || b.price));
+      if (params.sortBy === 'price_desc') data.sort((a, b) => (b.pricePerNight || b.price) - (a.pricePerNight || a.price));
+      if (params.sortBy === 'rating')     data.sort((a, b) => b.rating - a.rating);
     }
 
-    /**
-     * Get base URL for API
-     * @returns {string}
-     */
-    _getBaseUrl() {
-        // In development, use relative path
-        // In production, this would be your API domain
-        return window.location.origin + '/php/api';
-    }
+    return data;
+  }
 
-    /**
-     * Generic fetch wrapper with error handling
-     * @param {string} endpoint 
-     * @param {Object} options 
-     * @returns {Promise<Object>}
-     */
-    async _fetch(endpoint, options = {}) {
-        const url = `${this.baseUrl}${endpoint}`;
-        
-        const config = {
-            ...options,
-            headers: {
-                ...this.defaultHeaders,
-                ...options.headers
-            }
-        };
-
-        try {
-            const response = await fetch(url, config);
-            
-            if (!response.ok) {
-                throw new ApiError(
-                    `HTTP error! status: ${response.status}`,
-                    response.status
-                );
-            }
-
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            if (error instanceof ApiError) {
-                throw error;
-            }
-            throw new ApiError(error.message, 0);
-        }
-    }
-
-    /**
-     * GET request
-     * @param {string} endpoint 
-     * @param {Object} params 
-     * @returns {Promise<Object>}
-     */
-    async get(endpoint, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
-        const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-        return this._fetch(url, { method: 'GET' });
-    }
-
-    /**
-     * POST request
-     * @param {string} endpoint 
-     * @param {Object} data 
-     * @returns {Promise<Object>}
-     */
-    async post(endpoint, data = {}) {
-        return this._fetch(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-    }
-
-    /**
-     * PUT request
-     * @param {string} endpoint 
-     * @param {Object} data 
-     * @returns {Promise<Object>}
-     */
-    async put(endpoint, data = {}) {
-        return this._fetch(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-    }
-
-    /**
-     * DELETE request
-     * @param {string} endpoint 
-     * @returns {Promise<Object>}
-     */
-    async delete(endpoint) {
-        return this._fetch(endpoint, { method: 'DELETE' });
-    }
-
-    // === Specific API Methods ===
-
-    /**
-     * Get all countries
-     * @returns {Promise<Country[]>}
-     */
-    async getCountries() {
-        const data = await this.get('/countries.php');
-        return Country.fromJSONArray(data.countries || data);
-    }
-
-    /**
-     * Get country by ID
-     * @param {string} id 
-     * @returns {Promise<Country>}
-     */
-    async getCountryById(id) {
-        const data = await this.get(`/countries.php`, { id });
-        return Country.fromJSON(data.country || data);
-    }
-
-    /**
-     * Get cities by country ID
-     * @param {string} countryId 
-     * @returns {Promise<City[]>}
-     */
-    async getCitiesByCountry(countryId) {
-        const data = await this.get('/cities.php', { country_id: countryId });
-        return City.fromJSONArray(data.cities || data);
-    }
-
-    /**
-     * Get city by ID
-     * @param {string} id 
-     * @returns {Promise<City>}
-     */
-    async getCityById(id) {
-        const data = await this.get('/cities.php', { id });
-        return City.fromJSON(data.city || data);
-    }
-
-    /**
-     * Get hotels by city ID
-     * @param {string} cityId 
-     * @param {Object} filters 
-     * @returns {Promise<Hotel[]>}
-     */
-    async getHotelsByCity(cityId, filters = {}) {
-        const params = { city_id: cityId, ...filters };
-        const data = await this.get('/hotels.php', params);
-        return Hotel.fromJSONArray(data.hotels || data);
-    }
-
-    /**
-     * Get hotel by ID
-     * @param {string} id 
-     * @returns {Promise<Hotel>}
-     */
-    async getHotelById(id) {
-        const data = await this.get('/hotels.php', { id });
-        return Hotel.fromJSON(data.hotel || data);
-    }
-
-    /**
-     * Get entertainment by city ID
-     * @param {string} cityId 
-     * @param {Object} filters 
-     * @returns {Promise<Entertainment[]>}
-     */
-    async getEntertainmentByCity(cityId, filters = {}) {
-        const params = { city_id: cityId, ...filters };
-        const data = await this.get('/entertainment.php', params);
-        return Entertainment.fromJSONArray(data.entertainment || data);
-    }
-
-    /**
-     * Save trip to server
-     * @param {Trip} trip 
-     * @returns {Promise<Object>}
-     */
-    async saveTrip(trip) {
-        return this.post('/trips.php', trip.toJSON());
-    }
-
-    /**
-     * Get trip by ID
-     * @param {string} tripId 
-     * @returns {Promise<Trip>}
-     */
-    async getTripById(tripId) {
-        const data = await this.get('/trips.php', { id: tripId });
-        return Trip.fromJSON(data.trip || data);
-    }
-}
-
-/**
- * Custom API Error class
- */
-class ApiError extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.name = 'ApiError';
-        this.statusCode = statusCode;
-    }
-}
-
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { ApiService, ApiError };
+  // Convenience methods
+  static getCountries()                        { return ApiService.fetch('countries.php'); }
+  static getCities(countryId)                  { return ApiService.fetch('cities.php', countryId ? { countryId } : {}); }
+  static getHotels(cityId, filters = {})       { return ApiService.fetch('hotels.php', { ...(cityId ? { cityId } : {}), ...filters }); }
+  static getEntertainment(cityId, filters = {}) { return ApiService.fetch('entertainment.php', { ...(cityId ? { cityId } : {}), ...filters }); }
 }
