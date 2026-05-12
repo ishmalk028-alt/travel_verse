@@ -188,15 +188,20 @@
           <span class="summary-section__title">🎭 Activities (${trip.entertainment.length})</span>
         </div>
         <div class="summary-section__body">
-          ${trip.entertainment.map(e => `
-            <div class="summary-item">
-              <div class="summary-item__icon">${e.emoji}</div>
-              <div class="summary-item__content">
-                <div class="summary-item__title">${e.name}</div>
-                <div class="summary-item__detail">${e.cityName} · ${e.type} · ${e.duration}</div>
-              </div>
-              <div class="summary-item__price">${formatCurrency(e.price)}</div>
-            </div>`).join('')}
+          ${trip.entertainment.map(e => {
+            const cityName = e.cityName || trip.cities.find(c => c.id === e.cityId)?.name || 'Unknown city';
+            const emoji = e.emoji || '🎭';
+            const detail = [cityName, e.type, e.duration].filter(Boolean).join(' · ');
+            return `
+              <div class="summary-item">
+                <div class="summary-item__icon">${emoji}</div>
+                <div class="summary-item__content">
+                  <div class="summary-item__title">${e.name}</div>
+                  <div class="summary-item__detail">${detail}</div>
+                </div>
+                <div class="summary-item__price">${formatCurrency(e.price)}</div>
+              </div>`;
+          }).join('')}
         </div>
       </div>`);
   }

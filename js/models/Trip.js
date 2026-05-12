@@ -23,12 +23,14 @@ export class Trip {
 
   get hotelsCost() {
     return this.hotels.reduce((sum, h) => {
-      return sum + (h.hotel?.pricePerNight || 0) * (h.nights || 1);
+      const nightly = toNumber(h.hotel?.pricePerNight);
+      const nights = Math.max(1, toNumber(h.nights, 1));
+      return sum + nightly * nights;
     }, 0);
   }
 
   get entertainmentCost() {
-    return this.entertainment.reduce((sum, e) => sum + (e.price || 0), 0);
+    return this.entertainment.reduce((sum, e) => sum + toNumber(e.price), 0);
   }
 
   get serviceFee() {
@@ -52,4 +54,12 @@ export class Trip {
       updatedAt:     new Date().toISOString(),
     };
   }
+}
+
+function toNumber(value, fallback = 0) {
+  if (typeof value === 'string') {
+    value = value.replace(/[^0-9.-]/g, '');
+  }
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
 }
